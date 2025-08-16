@@ -313,8 +313,9 @@ class Google_Maps_Reviews_Init {
      * Register shortcodes
      */
     public function register_shortcodes() {
-        add_shortcode('google_maps_reviews', array('Google_Maps_Reviews_Shortcode', 'render'));
-        add_shortcode('gmrw_reviews', array('Google_Maps_Reviews_Shortcode', 'render')); // Alias
+        // Shortcodes are registered in the Google_Maps_Reviews_Shortcode constructor
+        // This method is kept for potential future enhancements
+        do_action('gmrw_shortcodes_registered');
     }
     
     /**
