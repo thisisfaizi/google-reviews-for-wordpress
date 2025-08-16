@@ -105,7 +105,7 @@ class Google_Maps_Reviews_Admin {
         // Register settings
         register_setting(
             GMRW_PLUGIN_SLUG,
-            GMRW_OPTION_NAME,
+            GMRW_OPTION_SETTINGS,
             array(
                 'sanitize_callback' => array($this, 'sanitize_settings'),
                 'default' => Google_Maps_Reviews_Config::get_default_settings()
@@ -505,7 +505,7 @@ class Google_Maps_Reviews_Admin {
         }
         
         // Update settings
-        $result = update_option(GMRW_OPTION_NAME, $import_data['settings']);
+        $result = update_option(GMRW_OPTION_SETTINGS, $import_data['settings']);
         
         if ($result) {
             wp_send_json_success(__('Settings imported successfully', GMRW_TEXT_DOMAIN));
@@ -628,7 +628,7 @@ class Google_Maps_Reviews_Admin {
         ?>
         <input type="url" 
                id="business_url" 
-               name="<?php echo GMRW_OPTION_NAME; ?>[business_url]" 
+               name="<?php echo GMRW_OPTION_SETTINGS; ?>[business_url]" 
                value="<?php echo esc_attr($business_url); ?>" 
                class="regular-text"
                placeholder="https://www.google.com/maps/place/Your+Business+Name">
@@ -648,7 +648,7 @@ class Google_Maps_Reviews_Admin {
         ?>
         <input type="number" 
                id="cache_duration" 
-               name="<?php echo GMRW_OPTION_NAME; ?>[cache_duration]" 
+               name="<?php echo GMRW_OPTION_SETTINGS; ?>[cache_duration]" 
                value="<?php echo esc_attr($cache_duration); ?>" 
                min="300" 
                max="86400" 
@@ -668,7 +668,7 @@ class Google_Maps_Reviews_Admin {
         <label>
             <input type="checkbox" 
                    id="auto_refresh" 
-                   name="<?php echo GMRW_OPTION_NAME; ?>[auto_refresh]" 
+                   name="<?php echo GMRW_OPTION_SETTINGS; ?>[auto_refresh]" 
                    value="1" 
                    <?php checked($auto_refresh); ?>>
             <?php esc_html_e('Automatically refresh cached reviews', GMRW_TEXT_DOMAIN); ?>
@@ -689,7 +689,7 @@ class Google_Maps_Reviews_Admin {
             'grid' => __('Grid', GMRW_TEXT_DOMAIN)
         );
         ?>
-        <select id="default_layout" name="<?php echo GMRW_OPTION_NAME; ?>[default_layout]">
+        <select id="default_layout" name="<?php echo GMRW_OPTION_SETTINGS; ?>[default_layout]">
             <?php foreach ($layouts as $value => $label) : ?>
                 <option value="<?php echo esc_attr($value); ?>" <?php selected($default_layout, $value); ?>>
                     <?php echo esc_html($label); ?>
@@ -708,7 +708,7 @@ class Google_Maps_Reviews_Admin {
         ?>
         <input type="number" 
                id="max_reviews" 
-               name="<?php echo GMRW_OPTION_NAME; ?>[max_reviews]" 
+               name="<?php echo GMRW_OPTION_SETTINGS; ?>[max_reviews]" 
                value="<?php echo esc_attr($max_reviews); ?>" 
                min="1" 
                max="50" 
@@ -726,7 +726,7 @@ class Google_Maps_Reviews_Admin {
         <label>
             <input type="checkbox" 
                    id="rate_limiting" 
-                   name="<?php echo GMRW_OPTION_NAME; ?>[rate_limiting]" 
+                   name="<?php echo GMRW_OPTION_SETTINGS; ?>[rate_limiting]" 
                    value="1" 
                    <?php checked($rate_limiting); ?>>
             <?php esc_html_e('Enable rate limiting', GMRW_TEXT_DOMAIN); ?>
@@ -744,7 +744,7 @@ class Google_Maps_Reviews_Admin {
         <label>
             <input type="checkbox" 
                    id="enable_logging" 
-                   name="<?php echo GMRW_OPTION_NAME; ?>[enable_logging]" 
+                   name="<?php echo GMRW_OPTION_SETTINGS; ?>[enable_logging]" 
                    value="1" 
                    <?php checked($enable_logging); ?>>
             <?php esc_html_e('Enable error logging', GMRW_TEXT_DOMAIN); ?>
