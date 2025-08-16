@@ -84,6 +84,12 @@ define('GMRW_DOMAIN_PATH', '/languages');
  * Initialize the plugin
  */
 function gmrw_init() {
+    // Load the autoloader first
+    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-autoloader.php';
+    
+    // Register the autoloader
+    $autoloader = new Google_Maps_Reviews_Autoloader();
+    
     // Initialize the plugin using the comprehensive initialization class
     Google_Maps_Reviews_Init::get_instance();
 }
