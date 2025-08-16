@@ -31,7 +31,7 @@
   - [x] 1.2 Set up plugin directory structure (includes, admin, assets, languages)
   - [x] 1.3 Create activation, deactivation, and uninstall hooks
   - [x] 1.4 Implement plugin autoloader and class loading system
-  - [ ] 1.5 Add plugin constants and configuration variables
+  - [x] 1.5 Add plugin constants and configuration variables
   - [ ] 1.6 Create basic plugin initialization and hook registration
 
 - [ ] 2.0 Google Maps Review Scraping System

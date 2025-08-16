@@ -35,6 +35,51 @@ define('GMRW_PLUGIN_BASENAME', plugin_basename(__FILE__));
 define('GMRW_PLUGIN_NAME', 'Google Maps Reviews Widget');
 define('GMRW_PLUGIN_SLUG', 'google-maps-reviews-widget');
 
+// Database and option constants
+define('GMRW_OPTION_SETTINGS', 'gmrw_settings');
+define('GMRW_OPTION_VERSION', 'gmrw_version');
+define('GMRW_OPTION_CACHE', 'gmrw_cache');
+define('GMRW_OPTION_LOGS', 'gmrw_logs');
+
+// Database table constants (will be set dynamically)
+define('GMRW_TABLE_REVIEWS_NAME', 'gmrw_reviews');
+define('GMRW_TABLE_LOGS_NAME', 'gmrw_logs');
+
+// Cache and performance constants
+define('GMRW_CACHE_DURATION', 3600); // 1 hour default
+define('GMRW_MAX_REVIEWS', 50); // Maximum reviews to fetch
+define('GMRW_REQUEST_TIMEOUT', 30); // HTTP request timeout in seconds
+define('GMRW_RATE_LIMIT_DELAY', 2); // Delay between requests in seconds
+
+// Display and layout constants
+define('GMRW_DEFAULT_LAYOUT', 'list');
+define('GMRW_DEFAULT_MAX_REVIEWS', 10);
+define('GMRW_DEFAULT_SHOW_AVATAR', true);
+define('GMRW_DEFAULT_SHOW_DATE', true);
+define('GMRW_DEFAULT_SHOW_RATING', true);
+
+// Security constants
+define('GMRW_NONCE_ACTION', 'gmrw_nonce');
+define('GMRW_CAPABILITY', 'manage_options');
+
+// AJAX action constants
+define('GMRW_AJAX_REFRESH_REVIEWS', 'gmrw_refresh_reviews');
+define('GMRW_AJAX_GET_REVIEWS', 'gmrw_get_reviews');
+
+// Cron job constants
+define('GMRW_CRON_HOOK', 'gmrw_refresh_reviews');
+define('GMRW_CRON_INTERVAL', 'daily');
+
+// Error and logging constants
+define('GMRW_LOG_LEVEL_ERROR', 'error');
+define('GMRW_LOG_LEVEL_WARNING', 'warning');
+define('GMRW_LOG_LEVEL_INFO', 'info');
+define('GMRW_LOG_LEVEL_DEBUG', 'debug');
+
+// Text domain constants
+define('GMRW_TEXT_DOMAIN', 'google-maps-reviews-widget');
+define('GMRW_DOMAIN_PATH', '/languages');
+
 // Plugin activation hook
 register_activation_hook(__FILE__, array('Google_Maps_Reviews_Activator', 'activate'));
 
@@ -51,7 +96,7 @@ register_uninstall_hook(__FILE__, array('Google_Maps_Reviews_Uninstall', 'uninst
  */
 function gmrw_init() {
     // Load text domain for translations
-    load_plugin_textdomain('google-maps-reviews-widget', false, dirname(GMRW_PLUGIN_BASENAME) . '/languages');
+    load_plugin_textdomain(GMRW_TEXT_DOMAIN, false, dirname(GMRW_PLUGIN_BASENAME) . GMRW_DOMAIN_PATH);
     
     // Initialize autoloader
     require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-autoloader.php';
@@ -73,10 +118,10 @@ function gmrw_init() {
     add_action('wp_enqueue_scripts', 'gmrw_enqueue_scripts');
     
     // Schedule review refresh if enabled
-    if (!wp_next_scheduled('gmrw_refresh_reviews')) {
-        $settings = get_option('gmrw_settings', array());
+    if (!wp_next_scheduled(GMRW_CRON_HOOK)) {
+        $settings = Google_Maps_Reviews_Config::get_settings();
         if (!empty($settings['auto_refresh'])) {
-            wp_schedule_event(time(), 'daily', 'gmrw_refresh_reviews');
+            wp_schedule_event(time(), GMRW_CRON_INTERVAL, GMRW_CRON_HOOK);
         }
     }
 }
@@ -117,11 +162,11 @@ function gmrw_enqueue_scripts() {
     // Localize script for AJAX
     wp_localize_script('google-maps-reviews-widget', 'gmrw_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('gmrw_nonce'),
+        'nonce' => wp_create_nonce(GMRW_NONCE_ACTION),
         'strings' => array(
-            'loading' => __('Loading reviews...', 'google-maps-reviews-widget'),
-            'error' => __('Error loading reviews', 'google-maps-reviews-widget'),
-            'no_reviews' => __('No reviews available', 'google-maps-reviews-widget')
+            'loading' => __('Loading reviews...', GMRW_TEXT_DOMAIN),
+            'error' => __('Error loading reviews', GMRW_TEXT_DOMAIN),
+            'no_reviews' => __('No reviews available', GMRW_TEXT_DOMAIN)
         )
     ));
 }
@@ -130,21 +175,31 @@ function gmrw_enqueue_scripts() {
 add_action('plugins_loaded', 'gmrw_init');
 
 // Handle AJAX requests
-add_action('wp_ajax_gmrw_refresh_reviews', 'gmrw_ajax_refresh_reviews');
-add_action('wp_ajax_nopriv_gmrw_refresh_reviews', 'gmrw_ajax_refresh_reviews');
+add_action('wp_ajax_' . GMRW_AJAX_REFRESH_REVIEWS, 'gmrw_ajax_refresh_reviews');
+add_action('wp_ajax_nopriv_' . GMRW_AJAX_REFRESH_REVIEWS, 'gmrw_ajax_refresh_reviews');
 
 /**
  * AJAX handler for refreshing reviews
  */
 function gmrw_ajax_refresh_reviews() {
     // Verify nonce
-    if (!wp_verify_nonce($_POST['nonce'], 'gmrw_nonce')) {
-        wp_die(__('Security check failed', 'google-maps-reviews-widget'));
+    if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+        wp_die(__('Security check failed', GMRW_TEXT_DOMAIN));
+    }
+    
+    // Check user capabilities
+    if (!Google_Maps_Reviews_Config::user_can('refresh_reviews')) {
+        wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
     }
     
     $business_url = sanitize_url($_POST['business_url']);
     if (empty($business_url)) {
-        wp_send_json_error(__('Business URL is required', 'google-maps-reviews-widget'));
+        wp_send_json_error(__('Business URL is required', GMRW_TEXT_DOMAIN));
+    }
+    
+    // Validate business URL
+    if (!Google_Maps_Reviews_Config::validate_business_url($business_url)) {
+        wp_send_json_error(__('Invalid Google Maps business URL', GMRW_TEXT_DOMAIN));
     }
     
     // Initialize scraper and get reviews
