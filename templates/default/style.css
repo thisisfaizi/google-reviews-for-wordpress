@@ -1,0 +1,417 @@
+/**
+ * Default Theme Styles
+ *
+ * @package GoogleMapsReviewsWidget
+ * @since 1.0.0
+ */
+
+/* Default Theme Variables */
+:root {
+    --gmrw-default-primary-color: #4285f4;
+    --gmrw-default-secondary-color: #34a853;
+    --gmrw-default-text-color: #333333;
+    --gmrw-default-light-text: #666666;
+    --gmrw-default-border-color: #e0e0e0;
+    --gmrw-default-background: #ffffff;
+    --gmrw-default-hover-bg: #f8f9fa;
+    --gmrw-default-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --gmrw-default-border-radius: 8px;
+    --gmrw-default-spacing: 16px;
+    --gmrw-default-font-size: 14px;
+    --gmrw-default-line-height: 1.5;
+}
+
+/* Business Info Styles */
+.gmrw-business-info.gmrw-theme-default {
+    background: var(--gmrw-default-background);
+    border: 1px solid var(--gmrw-default-border-color);
+    border-radius: var(--gmrw-default-border-radius);
+    padding: var(--gmrw-default-spacing);
+    margin-bottom: var(--gmrw-default-spacing);
+    box-shadow: var(--gmrw-default-shadow);
+}
+
+.gmrw-business-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gmrw-default-spacing);
+    margin-bottom: var(--gmrw-default-spacing);
+}
+
+.gmrw-business-image {
+    flex-shrink: 0;
+}
+
+.gmrw-business-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--gmrw-default-border-radius);
+    object-fit: cover;
+    border: 1px solid var(--gmrw-default-border-color);
+}
+
+.gmrw-business-details {
+    flex: 1;
+}
+
+.gmrw-business-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gmrw-default-text-color);
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.gmrw-business-address,
+.gmrw-business-phone {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--gmrw-default-font-size);
+    color: var(--gmrw-default-light-text);
+    margin-bottom: 4px;
+}
+
+.gmrw-business-phone a {
+    color: var(--gmrw-default-primary-color);
+    text-decoration: none;
+}
+
+.gmrw-business-phone a:hover {
+    text-decoration: underline;
+}
+
+.gmrw-business-rating {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gmrw-default-spacing);
+    padding: 12px;
+    background: var(--gmrw-default-hover-bg);
+    border-radius: var(--gmrw-default-border-radius);
+}
+
+.gmrw-rating-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gmrw-rating-details {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.gmrw-rating-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gmrw-default-text-color);
+}
+
+.gmrw-rating-max {
+    font-size: 16px;
+    color: var(--gmrw-default-light-text);
+}
+
+.gmrw-total-reviews {
+    font-size: var(--gmrw-default-font-size);
+    color: var(--gmrw-default-light-text);
+}
+
+.gmrw-business-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.gmrw-category {
+    background: var(--gmrw-default-primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.gmrw-business-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.gmrw-business-website,
+.gmrw-business-maps {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--gmrw-default-primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--gmrw-default-border-radius);
+    font-size: var(--gmrw-default-font-size);
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.gmrw-business-website:hover,
+.gmrw-business-maps:hover {
+    background: #3367d6;
+    color: white;
+    text-decoration: none;
+}
+
+/* Review Styles */
+.gmrw-review.gmrw-theme-default {
+    background: var(--gmrw-default-background);
+    border: 1px solid var(--gmrw-default-border-color);
+    border-radius: var(--gmrw-default-border-radius);
+    padding: var(--gmrw-default-spacing);
+    margin-bottom: var(--gmrw-default-spacing);
+    box-shadow: var(--gmrw-default-shadow);
+    transition: box-shadow 0.2s ease;
+}
+
+.gmrw-review.gmrw-theme-default:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gmrw-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--gmrw-default-spacing);
+}
+
+.gmrw-author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.gmrw-author-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gmrw-default-border-color);
+}
+
+.gmrw-default-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gmrw-default-primary-color);
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.gmrw-author-details {
+    flex: 1;
+}
+
+.gmrw-author-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gmrw-default-text-color);
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.gmrw-review-date {
+    font-size: 13px;
+    color: var(--gmrw-default-light-text);
+}
+
+.gmrw-rating-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.gmrw-rating-text {
+    font-size: 13px;
+    color: var(--gmrw-default-light-text);
+    font-weight: 500;
+}
+
+.gmrw-review-content {
+    margin-bottom: var(--gmrw-default-spacing);
+}
+
+.gmrw-review-text p {
+    margin: 0;
+    line-height: var(--gmrw-default-line-height);
+    color: var(--gmrw-default-text-color);
+}
+
+.gmrw-read-more,
+.gmrw-read-more-response {
+    background: none;
+    border: none;
+    color: var(--gmrw-default-primary-color);
+    font-size: var(--gmrw-default-font-size);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 8px;
+    text-decoration: underline;
+}
+
+.gmrw-read-more:hover,
+.gmrw-read-more-response:hover {
+    color: #3367d6;
+}
+
+.gmrw-review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--gmrw-default-spacing);
+    border-top: 1px solid var(--gmrw-default-border-color);
+}
+
+.gmrw-helpful-votes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--gmrw-default-light-text);
+}
+
+.gmrw-owner-response {
+    background: var(--gmrw-default-hover-bg);
+    border-radius: var(--gmrw-default-border-radius);
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.gmrw-owner-response-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.gmrw-owner-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gmrw-default-secondary-color);
+}
+
+.gmrw-owner-response-text p {
+    margin: 0;
+    font-size: var(--gmrw-default-font-size);
+    line-height: var(--gmrw-default-line-height);
+    color: var(--gmrw-default-text-color);
+}
+
+/* Star Rating Styles */
+.gmrw-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.gmrw-star {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.gmrw-star-filled {
+    color: #fbbc04;
+}
+
+.gmrw-star-empty {
+    color: #dadce0;
+}
+
+/* Icon Styles */
+.gmrw-icon-location::before { content: "📍"; }
+.gmrw-icon-phone::before { content: "📞"; }
+.gmrw-icon-globe::before { content: "🌐"; }
+.gmrw-icon-map::before { content: "🗺️"; }
+.gmrw-icon-thumbs-up::before { content: "👍"; }
+.gmrw-icon-reply::before { content: "💬"; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .gmrw-business-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .gmrw-business-rating {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .gmrw-review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .gmrw-rating-section {
+        align-items: flex-start;
+    }
+    
+    .gmrw-review-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .gmrw-business-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .gmrw-business-website,
+    .gmrw-business-maps {
+        justify-content: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --gmrw-default-background: #1a1a1a;
+        --gmrw-default-text-color: #ffffff;
+        --gmrw-default-light-text: #b0b0b0;
+        --gmrw-default-border-color: #333333;
+        --gmrw-default-hover-bg: #2a2a2a;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .gmrw-review.gmrw-theme-default,
+    .gmrw-business-info.gmrw-theme-default {
+        border-width: 2px;
+    }
+    
+    .gmrw-star-filled {
+        color: #000000;
+    }
+    
+    .gmrw-star-empty {
+        color: #cccccc;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .gmrw-review.gmrw-theme-default,
+    .gmrw-business-website,
+    .gmrw-business-maps {
+        transition: none;
+    }
+}

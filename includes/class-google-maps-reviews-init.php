@@ -269,6 +269,20 @@ class Google_Maps_Reviews_Init {
     }
     
     /**
+     * Admin initialization
+     */
+    public function admin_init() {
+        // Admin initialization is handled by Google_Maps_Reviews_Admin class
+    }
+    
+    /**
+     * Admin menu setup
+     */
+    public function admin_menu() {
+        // Admin menu is handled by Google_Maps_Reviews_Admin class
+    }
+    
+    /**
      * Initialize frontend components
      */
     private function init_frontend() {
@@ -324,11 +338,7 @@ class Google_Maps_Reviews_Init {
     public function frontend_scripts() {
         $settings = Google_Maps_Reviews_Config::get_settings();
         
-        // Only enqueue if enabled
-        if (empty($settings['enable_ajax'])) {
-            return;
-        }
-        
+        // Enqueue main CSS file
         wp_enqueue_style(
             'google-maps-reviews-widget',
             GMRW_PLUGIN_URL . 'assets/css/google-maps-reviews.css',
@@ -336,10 +346,58 @@ class Google_Maps_Reviews_Init {
             GMRW_VERSION
         );
         
+        // Enqueue layout-specific CSS files
+        $layouts = array('list', 'cards', 'carousel', 'grid');
+        foreach ($layouts as $layout) {
+            wp_enqueue_style(
+                'google-maps-reviews-' . $layout,
+                GMRW_PLUGIN_URL . 'assets/css/layouts/' . $layout . '.css',
+                array('google-maps-reviews-widget'),
+                GMRW_VERSION
+            );
+        }
+        
+        // Enqueue utility functions first
+        wp_enqueue_script(
+            'google-maps-reviews-utils',
+            GMRW_PLUGIN_URL . 'assets/js/utils.js',
+            array('jquery'),
+            GMRW_VERSION,
+            true
+        );
+        
+        // Enqueue carousel functionality
+        wp_enqueue_script(
+            'google-maps-reviews-carousel',
+            GMRW_PLUGIN_URL . 'assets/js/carousel.js',
+            array('jquery', 'google-maps-reviews-utils'),
+            GMRW_VERSION,
+            true
+        );
+        
+        // Enqueue filtering functionality
+        wp_enqueue_script(
+            'google-maps-reviews-filters',
+            GMRW_PLUGIN_URL . 'assets/js/filters.js',
+            array('jquery', 'google-maps-reviews-utils'),
+            GMRW_VERSION,
+            true
+        );
+        
+        // Enqueue pagination functionality
+        wp_enqueue_script(
+            'google-maps-reviews-pagination',
+            GMRW_PLUGIN_URL . 'assets/js/pagination.js',
+            array('jquery', 'google-maps-reviews-utils'),
+            GMRW_VERSION,
+            true
+        );
+        
+        // Enqueue main JavaScript file last
         wp_enqueue_script(
             'google-maps-reviews-widget',
             GMRW_PLUGIN_URL . 'assets/js/google-maps-reviews.js',
-            array('jquery'),
+            array('jquery', 'google-maps-reviews-utils', 'google-maps-reviews-carousel', 'google-maps-reviews-filters', 'google-maps-reviews-pagination'),
             GMRW_VERSION,
             true
         );
@@ -351,11 +409,30 @@ class Google_Maps_Reviews_Init {
             'strings' => array(
                 'loading' => __('Loading reviews...', GMRW_TEXT_DOMAIN),
                 'error' => __('Error loading reviews', GMRW_TEXT_DOMAIN),
-                'no_reviews' => __('No reviews available', GMRW_TEXT_DOMAIN)
+                'no_reviews' => __('No reviews available', GMRW_TEXT_DOMAIN),
+                'read_more' => __('Read more', GMRW_TEXT_DOMAIN),
+                'read_less' => __('Read less', GMRW_TEXT_DOMAIN),
+                'previous' => __('Previous', GMRW_TEXT_DOMAIN),
+                'next' => __('Next', GMRW_TEXT_DOMAIN),
+                'first' => __('First', GMRW_TEXT_DOMAIN),
+                'last' => __('Last', GMRW_TEXT_DOMAIN),
+                'page' => __('Page', GMRW_TEXT_DOMAIN),
+                'of' => __('of', GMRW_TEXT_DOMAIN),
+                'reviews' => __('reviews', GMRW_TEXT_DOMAIN),
+                'filter_by_rating' => __('Filter by rating', GMRW_TEXT_DOMAIN),
+                'filter_by_date' => __('Filter by date', GMRW_TEXT_DOMAIN),
+                'sort_by' => __('Sort by', GMRW_TEXT_DOMAIN),
+                'clear_filters' => __('Clear filters', GMRW_TEXT_DOMAIN)
             ),
             'settings' => array(
                 'auto_refresh' => !empty($settings['auto_refresh']),
                 'refresh_interval' => $settings['refresh_interval'] ?? 86400,
+                'carousel_autoplay' => !empty($settings['carousel_autoplay']),
+                'carousel_speed' => $settings['carousel_speed'] ?? 5000,
+                'pagination_enabled' => !empty($settings['pagination_enabled']),
+                'filters_enabled' => !empty($settings['filters_enabled']),
+                'lazy_loading' => !empty($settings['lazy_loading']),
+                'accessibility' => !empty($settings['accessibility'])
             )
         ));
     }

@@ -64,6 +64,9 @@ The Google Maps Reviews Widget and Shortcode plugin allows you to display Google
 
 ### Performance
 - **Cache Duration**: How long to cache reviews (300-86400 seconds)
+- **Reviews Per Page**: Number of reviews to show per page (1-20)
+- **Show Pagination**: Display pagination controls when reviews exceed per-page limit
+- **Show Review Count**: Display total number of reviews available
 
 ## Shortcode Usage
 
@@ -83,6 +86,9 @@ The Google Maps Reviews Widget and Shortcode plugin allows you to display Google
     min_rating="4"
     sort_by="date"
     sort_order="desc"
+    reviews_per_page="5"
+    show_pagination="true"
+    show_review_count="true"
     container_class="my-custom-reviews"
     title="Customer Testimonials"
 ]
@@ -137,6 +143,22 @@ The Google Maps Reviews Widget and Shortcode plugin allows you to display Google
 *Displays 10 reviews instead of the default 5.*
 
 #### Card Layout
+```
+[google_maps_reviews business_url="https://www.google.com/maps/place/Your+Business+Name" layout="cards" max_reviews="6"]
+```
+*Displays reviews in a card layout with 6 reviews.*
+
+#### Paginated Reviews
+```
+[google_maps_reviews business_url="https://www.google.com/maps/place/Your+Business+Name" max_reviews="20" reviews_per_page="5" show_pagination="true" show_review_count="true"]
+```
+*Displays 20 reviews with 5 per page, pagination controls, and review count display.*
+
+#### Reviews with Filtering
+```
+[google_maps_reviews business_url="https://www.google.com/maps/place/Your+Business+Name" show_filters="true" enable_client_side_filtering="true" preserve_filter_state="true"]
+```
+*Displays reviews with interactive filtering controls that remember user preferences.*
 ```
 [google_maps_reviews business_url="https://www.google.com/maps/place/Your+Business+Name" layout="cards" max_reviews="6"]
 ```

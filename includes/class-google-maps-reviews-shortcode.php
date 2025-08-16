@@ -76,7 +76,35 @@ class Google_Maps_Reviews_Shortcode {
         }
 
         if (!empty($reviews)) {
-            $this->display_reviews($reviews, $sanitized_attributes);
+            // Prepare filter options
+            $filter_options = array();
+            if ($sanitized_attributes['show_filters']) {
+                $filter_options = array(
+                    'show_filters' => $sanitized_attributes['show_filters'],
+                    'enable_client_side_filtering' => $sanitized_attributes['enable_client_side_filtering'],
+                    'preserve_filter_state' => $sanitized_attributes['preserve_filter_state'],
+                    'filters' => array(
+                        'min_rating' => $sanitized_attributes['min_rating'] > 0 ? $sanitized_attributes['min_rating'] : null,
+                        'date_range' => !empty($sanitized_attributes['date_range']) ? $sanitized_attributes['date_range'] : null,
+                        'custom_start_date' => !empty($sanitized_attributes['custom_start_date']) ? $sanitized_attributes['custom_start_date'] : null,
+                        'custom_end_date' => !empty($sanitized_attributes['custom_end_date']) ? $sanitized_attributes['custom_end_date'] : null,
+                        'sort_by' => $sanitized_attributes['sort_by'] === 'relevance' ? 'date-new' : $sanitized_attributes['sort_by'],
+                    )
+                );
+            }
+
+            // Use the display class for rendering
+            echo Google_Maps_Reviews_Display::render_reviews($reviews, array_merge(array(
+                'layout' => $sanitized_attributes['layout'],
+                'show_rating' => $sanitized_attributes['show_rating'],
+                'show_date' => $sanitized_attributes['show_date'],
+                'show_author_image' => $sanitized_attributes['show_author_image'],
+                'show_helpful_votes' => $sanitized_attributes['show_helpful_votes'],
+                'show_owner_response' => $sanitized_attributes['show_owner_response'],
+                'reviews_per_page' => $sanitized_attributes['reviews_per_page'],
+                'show_pagination' => $sanitized_attributes['show_pagination'],
+                'show_review_count' => $sanitized_attributes['show_review_count'],
+            ), $filter_options));
         } else {
             echo '<p class="gmrw-no-reviews">' . esc_html__('No reviews found for this business.', GMRW_TEXT_DOMAIN) . '</p>';
         }
@@ -107,12 +135,21 @@ class Google_Maps_Reviews_Shortcode {
             'cache_duration' => 3600,
             'container_class' => '',
             'title' => '',
+            'reviews_per_page' => 5,
+            'show_pagination' => 'false',
+            'show_review_count' => 'true',
+            'show_filters' => 'false',
+            'enable_client_side_filtering' => 'true',
+            'preserve_filter_state' => 'true',
+            'date_range' => '',
+            'custom_start_date' => '',
+            'custom_end_date' => '',
         );
 
         $attributes = shortcode_atts($defaults, $atts, self::SHORTCODE_TAG);
 
         // Convert boolean attributes
-        $boolean_attrs = array('show_rating', 'show_date', 'show_author_image', 'show_helpful_votes', 'show_owner_response', 'show_business_info');
+        $boolean_attrs = array('show_rating', 'show_date', 'show_author_image', 'show_helpful_votes', 'show_owner_response', 'show_business_info', 'show_pagination', 'show_review_count', 'show_filters', 'enable_client_side_filtering', 'preserve_filter_state');
         foreach ($boolean_attrs as $attr) {
             $attributes[$attr] = $this->string_to_bool($attributes[$attr]);
         }
@@ -121,6 +158,7 @@ class Google_Maps_Reviews_Shortcode {
         $attributes['max_reviews'] = max(1, min(50, intval($attributes['max_reviews'])));
         $attributes['min_rating'] = max(0, min(5, intval($attributes['min_rating'])));
         $attributes['cache_duration'] = max(300, min(86400, intval($attributes['cache_duration'])));
+        $attributes['reviews_per_page'] = max(1, min(20, intval($attributes['reviews_per_page'])));
 
         // Validate layout
         $layouts = Google_Maps_Reviews_Config::get_available_layouts();

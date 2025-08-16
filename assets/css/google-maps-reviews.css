@@ -1,0 +1,693 @@
+/**
+ * Google Maps Reviews Widget - Main Styles
+ *
+ * @package GoogleMapsReviewsWidget
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Base Styles and Reset
+   ========================================================================== */
+
+.gmrw-widget,
+.gmrw-shortcode {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.gmrw-widget *,
+.gmrw-shortcode * {
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Business Information Styles
+   ========================================================================== */
+
+.gmrw-business-info {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007cba;
+}
+
+.gmrw-business-name {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.gmrw-business-rating {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gmrw-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gmrw-rating-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.gmrw-review-count {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.gmrw-business-address,
+.gmrw-business-phone,
+.gmrw-business-website {
+    margin: 0.5rem 0;
+    color: #6c757d;
+}
+
+.gmrw-business-website a {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.gmrw-business-website a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Star Rating Styles
+   ========================================================================== */
+
+.gmrw-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.gmrw-star {
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.gmrw-star-filled {
+    color: #ffc107;
+}
+
+.gmrw-star-empty {
+    color: #e9ecef;
+}
+
+/* ==========================================================================
+   Review Item Styles
+   ========================================================================== */
+
+.gmrw-review {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.gmrw-review:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.gmrw-review-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gmrw-author-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+}
+
+.gmrw-default-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #007cba;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.gmrw-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.gmrw-author-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.gmrw-review-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.gmrw-review-rating {
+    margin-bottom: 1rem;
+}
+
+.gmrw-review-content {
+    margin-bottom: 1rem;
+}
+
+.gmrw-review-text {
+    margin: 0;
+    line-height: 1.6;
+    color: #495057;
+}
+
+.gmrw-helpful-votes {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.gmrw-owner-response {
+    background: #f8f9fa;
+    border-left: 3px solid #28a745;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.gmrw-owner-response strong {
+    color: #28a745;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.gmrw-owner-response-text {
+    margin: 0;
+    color: #495057;
+}
+
+/* ==========================================================================
+   Read More Functionality
+   ========================================================================== */
+
+.gmrw-read-more,
+.gmrw-read-more-response {
+    background: none;
+    border: none;
+    color: #007cba;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0;
+    margin-top: 0.5rem;
+}
+
+.gmrw-read-more:hover,
+.gmrw-read-more-response:hover {
+    color: #005a87;
+}
+
+/* ==========================================================================
+   Pagination Styles
+   ========================================================================== */
+
+.gmrw-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.gmrw-pagination a,
+.gmrw-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.gmrw-pagination a:hover {
+    background: #007cba;
+    color: #fff;
+    border-color: #007cba;
+}
+
+.gmrw-pagination-current {
+    background: #007cba;
+    color: #fff;
+    border-color: #007cba;
+}
+
+.gmrw-pagination-ellipsis {
+    border: none;
+    color: #6c757d;
+}
+
+/* ==========================================================================
+   Error and No Reviews Messages
+   ========================================================================== */
+
+.gmrw-error,
+.gmrw-no-reviews {
+    text-align: center;
+    padding: 2rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.gmrw-error {
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+    background: #f8d7da;
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+.gmrw-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.gmrw-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 50%;
+    border-top-color: #007cba;
+    animation: gmrw-spin 1s ease-in-out infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes gmrw-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .gmrw-business-info {
+        padding: 1rem;
+    }
+    
+    .gmrw-business-name {
+        font-size: 1.25rem;
+    }
+    
+    .gmrw-review {
+        padding: 1rem;
+    }
+    
+    .gmrw-review-author {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .gmrw-author-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .gmrw-pagination {
+        gap: 0.25rem;
+    }
+    
+    .gmrw-pagination a,
+    .gmrw-pagination span {
+        min-width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .gmrw-business-rating {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .gmrw-review {
+        padding: 0.75rem;
+    }
+    
+    .gmrw-pagination {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .gmrw-review:hover {
+        box-shadow: none;
+        transform: none;
+    }
+    
+    .gmrw-pagination {
+        display: none;
+    }
+    
+    .gmrw-read-more,
+    .gmrw-read-more-response {
+        display: none;
+    }
+    
+    .gmrw-review-text,
+    .gmrw-owner-response-text {
+        display: block !important;
+    }
+}
+
+/* ==========================================================================
+   High Contrast Mode Support
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+    .gmrw-review {
+        border-width: 2px;
+    }
+    
+    .gmrw-star-filled {
+        color: #000;
+    }
+    
+    .gmrw-star-empty {
+        color: #ccc;
+    }
+}
+
+/* ==========================================================================
+   Reduced Motion Support
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .gmrw-review,
+    .gmrw-pagination a,
+    .gmrw-read-more,
+    .gmrw-read-more-response {
+        transition: none;
+    }
+    
+    .gmrw-review:hover {
+        transform: none;
+    }
+    
+    .gmrw-loading::after {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Review Count Display
+   ========================================================================== */
+
+.gmrw-review-count-display {
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007cba;
+}
+
+.gmrw-review-count-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Dark mode support for review count */
+@media (prefers-color-scheme: dark) {
+    .gmrw-review-count-display {
+        background: #2d3748;
+        border-left-color: #4299e1;
+    }
+    
+    .gmrw-review-count-text {
+        color: #e2e8f0;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .gmrw-review-count-display {
+        background: #ffffff;
+        border: 2px solid #000000;
+    }
+    
+    .gmrw-review-count-text {
+        color: #000000;
+        font-weight: 700;
+    }
+}
+
+/* ==========================================================================
+   Filter Styles
+   ========================================================================== */
+
+.gmrw-filters {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.gmrw-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.gmrw-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 120px;
+}
+
+.gmrw-filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.gmrw-filter-group select,
+.gmrw-filter-group input[type="date"] {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background: #fff;
+    color: #495057;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gmrw-filter-group select:focus,
+.gmrw-filter-group input[type="date"]:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+.gmrw-count-group {
+    min-width: auto;
+    flex-direction: row;
+    align-items: center;
+}
+
+.gmrw-review-count {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.gmrw-clear-filters {
+    padding: 0.5rem 1rem;
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.gmrw-clear-filters:hover {
+    background: #5a6268;
+}
+
+.gmrw-clear-filters:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.3);
+}
+
+.gmrw-custom-date-range {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.gmrw-custom-date-range .gmrw-filter-group {
+    min-width: 150px;
+}
+
+/* Filter loading state */
+.gmrw-filtering {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.gmrw-filtering::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: gmrw-spin 1s linear infinite;
+}
+
+@keyframes gmrw-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive filter design */
+@media (max-width: 768px) {
+    .gmrw-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .gmrw-filter-group {
+        min-width: auto;
+    }
+    
+    .gmrw-count-group {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
+    .gmrw-clear-filters {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .gmrw-widget,
+    .gmrw-shortcode {
+        color: #e9ecef;
+    }
+    
+    .gmrw-business-info {
+        background: #2c3e50;
+        border-left-color: #007cba;
+    }
+    
+    .gmrw-business-name {
+        color: #fff;
+    }
+    
+    .gmrw-review {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .gmrw-review:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .gmrw-author-name {
+        color: #fff;
+    }
+    
+    .gmrw-review-text {
+        color: #e9ecef;
+    }
+    
+    .gmrw-owner-response {
+        background: #495057;
+        border-left-color: #28a745;
+    }
+    
+    .gmrw-owner-response-text {
+        color: #e9ecef;
+    }
+    
+    .gmrw-pagination a,
+    .gmrw-pagination span {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .gmrw-pagination a:hover {
+        background: #007cba;
+        color: #fff;
+    }
+    
+    .gmrw-error,
+    .gmrw-no-reviews {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+}

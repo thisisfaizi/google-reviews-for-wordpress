@@ -1,0 +1,448 @@
+/**
+ * Google Maps Reviews Widget - Grid Layout
+ *
+ * @package GoogleMapsReviewsWidget
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Grid Layout Container
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-reviews-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Default 4 columns */
+.gmrw-layout-grid[data-columns="4"] .gmrw-reviews-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.gmrw-layout-grid[data-columns="2"] .gmrw-reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gmrw-layout-grid[data-columns="3"] .gmrw-reviews-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.gmrw-layout-grid[data-columns="5"] .gmrw-reviews-grid {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.gmrw-layout-grid[data-columns="6"] .gmrw-reviews-grid {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+/* ==========================================================================
+   Grid Layout Review Items
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #007cba, #005a87);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    border-color: #007cba;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item:hover::before {
+    transform: scaleX(1);
+}
+
+/* ==========================================================================
+   Grid Layout Review Header
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-image {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+    flex-shrink: 0;
+    transition: border-color 0.3s ease;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item:hover .gmrw-author-image {
+    border-color: #007cba;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* ==========================================================================
+   Grid Layout Review Rating
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-rating {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-stars {
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   Grid Layout Review Content
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-content {
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-text {
+    margin: 0;
+    line-height: 1.6;
+    color: #495057;
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Grid Layout Review Footer
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f3f4;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-helpful-votes {
+    font-size: 0.8rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-helpful-votes::before {
+    content: '👍';
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   Grid Layout Owner Response
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response {
+    background: #f8f9fa;
+    border-left: 3px solid #28a745;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    position: relative;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response::before {
+    content: '💬';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1rem;
+    opacity: 0.5;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response strong {
+    color: #28a745;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response-text {
+    margin: 0;
+    color: #495057;
+    font-style: italic;
+    font-size: 0.85rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Grid Layout Read More
+   ========================================================================== */
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more,
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more-response {
+    background: none;
+    border: none;
+    color: #007cba;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more:hover,
+.gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more-response:hover {
+    color: #005a87;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   Grid Layout Responsive Design
+   ========================================================================== */
+
+@media (max-width: 1400px) {
+    .gmrw-layout-grid[data-columns="6"] .gmrw-reviews-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .gmrw-layout-grid[data-columns="6"] .gmrw-reviews-grid,
+    .gmrw-layout-grid[data-columns="5"] .gmrw-reviews-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .gmrw-layout-grid[data-columns="6"] .gmrw-reviews-grid,
+    .gmrw-layout-grid[data-columns="5"] .gmrw-reviews-grid,
+    .gmrw-layout-grid[data-columns="4"] .gmrw-reviews-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .gmrw-layout-grid .gmrw-reviews-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item {
+        padding: 1rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-image {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-name {
+        font-size: 0.95rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-text {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 4;
+    }
+}
+
+@media (max-width: 576px) {
+    .gmrw-layout-grid .gmrw-reviews-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item {
+        padding: 1rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-author {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        text-align: center;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-image {
+        width: 52px;
+        height: 52px;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-text {
+        -webkit-line-clamp: 5;
+    }
+}
+
+/* ==========================================================================
+   Grid Layout Dark Mode
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .gmrw-layout-grid .gmrw-review-grid-item {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        border-color: #007cba;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-author {
+        border-bottom-color: #495057;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-name {
+        color: #fff;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-text {
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-footer {
+        border-top-color: #495057;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response {
+        background: #495057;
+        border-left-color: #28a745;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response-text {
+        color: #e9ecef;
+    }
+}
+
+/* ==========================================================================
+   Grid Layout Print Styles
+   ========================================================================== */
+
+@media print {
+    .gmrw-layout-grid .gmrw-reviews-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ccc;
+        box-shadow: none;
+        transform: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item::before {
+        display: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response::before {
+        display: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-review-text,
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-owner-response-text {
+        display: block !important;
+        -webkit-line-clamp: unset;
+    }
+}
+
+/* ==========================================================================
+   Grid Layout High Contrast Mode
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+    .gmrw-layout-grid .gmrw-review-grid-item {
+        border-width: 2px;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item:hover {
+        border-width: 3px;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item::before {
+        height: 5px;
+    }
+}
+
+/* ==========================================================================
+   Grid Layout Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .gmrw-layout-grid .gmrw-review-grid-item,
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-author-image,
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more,
+    .gmrw-layout-grid .gmrw-review-grid-item .gmrw-read-more-response {
+        transition: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item:hover {
+        transform: none;
+    }
+    
+    .gmrw-layout-grid .gmrw-review-grid-item::before {
+        transition: none;
+    }
+}

@@ -61,6 +61,9 @@ class Google_Maps_Reviews_Widget extends WP_Widget {
         $sort_order = $sanitized_instance['sort_order'];
         $min_rating = $sanitized_instance['min_rating'];
         $cache_duration = $sanitized_instance['cache_duration'];
+        $reviews_per_page = isset($sanitized_instance['reviews_per_page']) ? $sanitized_instance['reviews_per_page'] : 5;
+        $show_pagination = isset($sanitized_instance['show_pagination']) ? $sanitized_instance['show_pagination'] : false;
+        $show_review_count = isset($sanitized_instance['show_review_count']) ? $sanitized_instance['show_review_count'] : true;
 
         // Validate business URL
         if (empty($business_url)) {
@@ -132,14 +135,32 @@ class Google_Maps_Reviews_Widget extends WP_Widget {
 
         // Reviews
         if (!empty($reviews)) {
-            $this->display_reviews($reviews, array(
+            // Prepare filter options
+            $filter_options = array();
+            if ($show_filters) {
+                $filter_options = array(
+                    'show_filters' => $show_filters,
+                    'enable_client_side_filtering' => $enable_client_side_filtering,
+                    'preserve_filter_state' => $preserve_filter_state,
+                    'filters' => array(
+                        'min_rating' => $min_rating > 0 ? $min_rating : null,
+                        'sort_by' => $sort_by === 'relevance' ? 'date-new' : $sort_by,
+                    )
+                );
+            }
+
+            // Use the display class for rendering
+            echo Google_Maps_Reviews_Display::render_reviews($reviews, array_merge(array(
                 'layout' => $layout,
                 'show_rating' => $show_rating,
                 'show_date' => $show_date,
                 'show_author_image' => $show_author_image,
                 'show_helpful_votes' => $show_helpful_votes,
                 'show_owner_response' => $show_owner_response,
-            ));
+                'reviews_per_page' => $reviews_per_page,
+                'show_pagination' => $show_pagination,
+                'show_review_count' => $show_review_count,
+            ), $filter_options));
         } else {
             echo '<p>' . esc_html__('No reviews found for this business.', GMRW_TEXT_DOMAIN) . '</p>';
         }
@@ -167,6 +188,9 @@ class Google_Maps_Reviews_Widget extends WP_Widget {
         $sort_order = isset($instance['sort_order']) ? $instance['sort_order'] : 'desc';
         $min_rating = isset($instance['min_rating']) ? intval($instance['min_rating']) : 0;
         $cache_duration = isset($instance['cache_duration']) ? intval($instance['cache_duration']) : 3600;
+        $show_filters = isset($instance['show_filters']) ? (bool) $instance['show_filters'] : false;
+        $enable_client_side_filtering = isset($instance['enable_client_side_filtering']) ? (bool) $instance['enable_client_side_filtering'] : true;
+        $preserve_filter_state = isset($instance['preserve_filter_state']) ? (bool) $instance['preserve_filter_state'] : true;
 
         // Get available options
         $layouts = Google_Maps_Reviews_Config::get_available_layouts();
@@ -286,6 +310,20 @@ class Google_Maps_Reviews_Widget extends WP_Widget {
             <small><?php esc_html_e('Minimum 5 minutes (300s), Maximum 24 hours (86400s)', GMRW_TEXT_DOMAIN); ?></small>
         </p>
 
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('reviews_per_page')); ?>">
+                <?php esc_html_e('Reviews Per Page:', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <input class="tiny-text" 
+                   id="<?php echo esc_attr($this->get_field_id('reviews_per_page')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('reviews_per_page')); ?>" 
+                   type="number" 
+                   min="1" 
+                   max="20" 
+                   value="<?php echo esc_attr(isset($instance['reviews_per_page']) ? $instance['reviews_per_page'] : 5); ?>">
+            <small><?php esc_html_e('Number of reviews to show per page (1-20)', GMRW_TEXT_DOMAIN); ?></small>
+        </p>
+
         <h4><?php esc_html_e('Display Options:', GMRW_TEXT_DOMAIN); ?></h4>
 
         <p>
@@ -341,6 +379,73 @@ class Google_Maps_Reviews_Widget extends WP_Widget {
             <label for="<?php echo esc_attr($this->get_field_id('show_owner_response')); ?>">
                 <?php esc_html_e('Show Owner Responses', GMRW_TEXT_DOMAIN); ?>
             </label>
+        </p>
+
+        <p>
+            <input type="checkbox" 
+                   id="<?php echo esc_attr($this->get_field_id('show_pagination')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('show_pagination')); ?>" 
+                   value="1" 
+                   <?php checked(isset($instance['show_pagination']) ? $instance['show_pagination'] : false); ?>>
+            <label for="<?php echo esc_attr($this->get_field_id('show_pagination')); ?>">
+                <?php esc_html_e('Show Pagination', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <br>
+            <small><?php esc_html_e('Display pagination controls when reviews exceed per-page limit', GMRW_TEXT_DOMAIN); ?></small>
+        </p>
+
+        <p>
+            <input type="checkbox" 
+                   id="<?php echo esc_attr($this->get_field_id('show_review_count')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('show_review_count')); ?>" 
+                   value="1" 
+                   <?php checked(isset($instance['show_review_count']) ? $instance['show_review_count'] : true); ?>>
+            <label for="<?php echo esc_attr($this->get_field_id('show_review_count')); ?>">
+                <?php esc_html_e('Show Review Count', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <br>
+            <small><?php esc_html_e('Display total number of reviews available', GMRW_TEXT_DOMAIN); ?></small>
+        </p>
+
+        <h4><?php esc_html_e('Filter Options:', GMRW_TEXT_DOMAIN); ?></h4>
+
+        <p>
+            <input type="checkbox" 
+                   id="<?php echo esc_attr($this->get_field_id('show_filters')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('show_filters')); ?>" 
+                   value="1" 
+                   <?php checked(isset($instance['show_filters']) ? $instance['show_filters'] : false); ?>>
+            <label for="<?php echo esc_attr($this->get_field_id('show_filters')); ?>">
+                <?php esc_html_e('Show Filter Controls', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <br>
+            <small><?php esc_html_e('Allow users to filter reviews by rating and date', GMRW_TEXT_DOMAIN); ?></small>
+        </p>
+
+        <p>
+            <input type="checkbox" 
+                   id="<?php echo esc_attr($this->get_field_id('enable_client_side_filtering')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('enable_client_side_filtering')); ?>" 
+                   value="1" 
+                   <?php checked(isset($instance['enable_client_side_filtering']) ? $instance['enable_client_side_filtering'] : true); ?>>
+            <label for="<?php echo esc_attr($this->get_field_id('enable_client_side_filtering')); ?>">
+                <?php esc_html_e('Enable Client-Side Filtering', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <br>
+            <small><?php esc_html_e('Use JavaScript for instant filtering (recommended)', GMRW_TEXT_DOMAIN); ?></small>
+        </p>
+
+        <p>
+            <input type="checkbox" 
+                   id="<?php echo esc_attr($this->get_field_id('preserve_filter_state')); ?>" 
+                   name="<?php echo esc_attr($this->get_field_name('preserve_filter_state')); ?>" 
+                   value="1" 
+                   <?php checked(isset($instance['preserve_filter_state']) ? $instance['preserve_filter_state'] : true); ?>>
+            <label for="<?php echo esc_attr($this->get_field_id('preserve_filter_state')); ?>">
+                <?php esc_html_e('Preserve Filter State', GMRW_TEXT_DOMAIN); ?>
+            </label>
+            <br>
+            <small><?php esc_html_e('Remember user filter preferences', GMRW_TEXT_DOMAIN); ?></small>
         </p>
         <?php
     }

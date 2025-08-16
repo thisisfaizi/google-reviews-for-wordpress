@@ -1,0 +1,669 @@
+/**
+ * Google Maps Reviews Widget - Carousel Layout
+ *
+ * @package GoogleMapsReviewsWidget
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Carousel Layout Container
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-reviews-carousel {
+    position: relative;
+    overflow: hidden;
+    padding: 0 60px;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* ==========================================================================
+   Carousel Track
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    gap: 1.5rem;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide {
+    flex: 0 0 calc(33.333% - 1rem);
+    min-width: 0;
+}
+
+/* Responsive slide widths */
+.gmrw-layout-carousel[data-slides="1"] .gmrw-carousel-slide {
+    flex: 0 0 100%;
+}
+
+.gmrw-layout-carousel[data-slides="2"] .gmrw-carousel-slide {
+    flex: 0 0 calc(50% - 0.75rem);
+}
+
+.gmrw-layout-carousel[data-slides="3"] .gmrw-carousel-slide {
+    flex: 0 0 calc(33.333% - 1rem);
+}
+
+.gmrw-layout-carousel[data-slides="4"] .gmrw-carousel-slide {
+    flex: 0 0 calc(25% - 1.125rem);
+}
+
+.gmrw-layout-carousel[data-slides="5"] .gmrw-carousel-slide {
+    flex: 0 0 calc(20% - 1.2rem);
+}
+
+.gmrw-layout-carousel[data-slides="6"] .gmrw-carousel-slide {
+    flex: 0 0 calc(16.666% - 1.25rem);
+}
+
+/* ==========================================================================
+   Carousel Navigation Buttons
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-prev,
+.gmrw-layout-carousel .gmrw-carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    color: #007cba;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-prev {
+    left: 0;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-next {
+    right: 0;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-prev:hover,
+.gmrw-layout-carousel .gmrw-carousel-next:hover {
+    background: #007cba;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.gmrw-layout-carousel .gmrw-carousel-prev:active,
+.gmrw-layout-carousel .gmrw-carousel-next:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.gmrw-layout-carousel .gmrw-carousel-prev:focus,
+.gmrw-layout-carousel .gmrw-carousel-next:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Carousel Dots
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-dot {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: #e9ecef;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-dot:hover {
+    background: #007cba;
+    transform: scale(1.2);
+}
+
+.gmrw-layout-carousel .gmrw-carousel-dot.active {
+    background: #007cba;
+    transform: scale(1.3);
+}
+
+.gmrw-layout-carousel .gmrw-carousel-dot:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Carousel Review Cards
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007cba, #005a87);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    border-color: #007cba;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover::before {
+    transform: scaleX(1);
+}
+
+/* ==========================================================================
+   Carousel Review Header
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+    flex-shrink: 0;
+    transition: border-color 0.3s ease;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover .gmrw-author-image {
+    border-color: #007cba;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* ==========================================================================
+   Carousel Review Rating
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-rating {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-stars {
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   Carousel Review Content
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-content {
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-text {
+    margin: 0;
+    line-height: 1.6;
+    color: #495057;
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Carousel Review Footer
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-footer {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f3f4;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-helpful-votes {
+    font-size: 0.8rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-helpful-votes::before {
+    content: '👍';
+    font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   Carousel Owner Response
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response {
+    background: #f8f9fa;
+    border-left: 3px solid #28a745;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    position: relative;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response::before {
+    content: '💬';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1rem;
+    opacity: 0.5;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response strong {
+    color: #28a745;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response-text {
+    margin: 0;
+    color: #495057;
+    font-style: italic;
+    font-size: 0.85rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Carousel Read More
+   ========================================================================== */
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more,
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more-response {
+    background: none;
+    border: none;
+    color: #007cba;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more:hover,
+.gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more-response:hover {
+    color: #005a87;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   Carousel Autoplay Indicator
+   ========================================================================== */
+
+.gmrw-layout-carousel[data-autoplay="true"]::after {
+    content: '▶';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 124, 186, 0.8);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    animation: gmrw-pulse 2s infinite;
+    z-index: 5;
+}
+
+@keyframes gmrw-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* ==========================================================================
+   Carousel Responsive Design
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .gmrw-layout-carousel[data-slides="6"] .gmrw-carousel-slide,
+    .gmrw-layout-carousel[data-slides="5"] .gmrw-carousel-slide {
+        flex: 0 0 calc(25% - 1.125rem);
+    }
+}
+
+@media (max-width: 992px) {
+    .gmrw-layout-carousel[data-slides="6"] .gmrw-carousel-slide,
+    .gmrw-layout-carousel[data-slides="5"] .gmrw-carousel-slide,
+    .gmrw-layout-carousel[data-slides="4"] .gmrw-carousel-slide {
+        flex: 0 0 calc(33.333% - 1rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .gmrw-layout-carousel {
+        padding: 0 50px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide {
+        flex: 0 0 calc(50% - 0.75rem) !important;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+        padding: 1rem;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-text {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 3;
+    }
+}
+
+@media (max-width: 576px) {
+    .gmrw-layout-carousel {
+        padding: 0 40px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide {
+        flex: 0 0 100% !important;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+        padding: 1rem;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-author {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        text-align: center;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-image {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-text {
+        -webkit-line-clamp: 4;
+    }
+}
+
+/* ==========================================================================
+   Carousel Dark Mode
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next {
+        background: #2c3e50;
+        color: #e9ecef;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev:hover,
+    .gmrw-layout-carousel .gmrw-carousel-next:hover {
+        background: #007cba;
+        color: #fff;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-dot {
+        background: #495057;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-dot:hover,
+    .gmrw-layout-carousel .gmrw-carousel-dot.active {
+        background: #007cba;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        border-color: #007cba;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-name {
+        color: #fff;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-text {
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-author {
+        border-bottom-color: #495057;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-footer {
+        border-top-color: #495057;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response {
+        background: #495057;
+        border-left-color: #28a745;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response-text {
+        color: #e9ecef;
+    }
+}
+
+/* ==========================================================================
+   Carousel Print Styles
+   ========================================================================== */
+
+@media print {
+    .gmrw-layout-carousel {
+        padding: 0;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next,
+    .gmrw-layout-carousel .gmrw-carousel-dots {
+        display: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-track {
+        transform: none !important;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide {
+        flex: 0 0 calc(50% - 0.5rem) !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+        border: 1px solid #ccc;
+        box-shadow: none;
+        transform: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review::before {
+        display: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response::before {
+        display: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review-text,
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-owner-response-text {
+        display: block !important;
+        -webkit-line-clamp: unset;
+    }
+}
+
+/* ==========================================================================
+   Carousel High Contrast Mode
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review {
+        border-width: 2px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover {
+        border-width: 3px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review::before {
+        height: 6px;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next {
+        border: 2px solid #007cba;
+    }
+}
+
+/* ==========================================================================
+   Carousel Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .gmrw-layout-carousel .gmrw-carousel-track {
+        transition: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review,
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-author-image,
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more,
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-read-more-response {
+        transition: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review:hover {
+        transform: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-slide .gmrw-review::before {
+        transition: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev,
+    .gmrw-layout-carousel .gmrw-carousel-next,
+    .gmrw-layout-carousel .gmrw-carousel-dot {
+        transition: none;
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-prev:hover,
+    .gmrw-layout-carousel .gmrw-carousel-next:hover {
+        transform: translateY(-50%);
+    }
+    
+    .gmrw-layout-carousel .gmrw-carousel-dot:hover {
+        transform: none;
+    }
+    
+    .gmrw-layout-carousel[data-autoplay="true"]::after {
+        animation: none;
+    }
+}

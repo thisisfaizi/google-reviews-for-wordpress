@@ -1,0 +1,369 @@
+/**
+ * Google Maps Reviews Widget - List Layout
+ *
+ * @package GoogleMapsReviewsWidget
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   List Layout Container
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ==========================================================================
+   List Layout Review Items
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-review {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.gmrw-layout-list .gmrw-review:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: #007cba;
+}
+
+.gmrw-layout-list .gmrw-review::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007cba, #005a87);
+    border-radius: 8px 8px 0 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.gmrw-layout-list .gmrw-review:hover::before {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   List Layout Review Header
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.gmrw-layout-list .gmrw-review-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.gmrw-layout-list .gmrw-author-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+    flex-shrink: 0;
+}
+
+.gmrw-layout-list .gmrw-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.gmrw-layout-list .gmrw-author-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gmrw-layout-list .gmrw-review-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.gmrw-layout-list .gmrw-review-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   List Layout Review Content
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-review-content {
+    margin-bottom: 1rem;
+}
+
+.gmrw-layout-list .gmrw-review-text {
+    margin: 0;
+    line-height: 1.6;
+    color: #495057;
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   List Layout Review Footer
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-review-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.gmrw-layout-list .gmrw-helpful-votes {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gmrw-layout-list .gmrw-helpful-votes::before {
+    content: '👍';
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   List Layout Owner Response
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-owner-response {
+    background: #f8f9fa;
+    border-left: 3px solid #28a745;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    position: relative;
+}
+
+.gmrw-layout-list .gmrw-owner-response::before {
+    content: '💬';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.2rem;
+    opacity: 0.5;
+}
+
+.gmrw-layout-list .gmrw-owner-response strong {
+    color: #28a745;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gmrw-layout-list .gmrw-owner-response-text {
+    margin: 0;
+    color: #495057;
+    font-style: italic;
+}
+
+/* ==========================================================================
+   List Layout Read More
+   ========================================================================== */
+
+.gmrw-layout-list .gmrw-read-more,
+.gmrw-layout-list .gmrw-read-more-response {
+    background: none;
+    border: none;
+    color: #007cba;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.gmrw-layout-list .gmrw-read-more:hover,
+.gmrw-layout-list .gmrw-read-more-response:hover {
+    color: #005a87;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   List Layout Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .gmrw-layout-list .gmrw-review {
+        padding: 1rem;
+    }
+    
+    .gmrw-layout-list .gmrw-review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .gmrw-layout-list .gmrw-review-author {
+        width: 100%;
+    }
+    
+    .gmrw-layout-list .gmrw-author-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .gmrw-layout-list .gmrw-review-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .gmrw-layout-list .gmrw-review {
+        padding: 0.75rem;
+    }
+    
+    .gmrw-layout-list .gmrw-review-author {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .gmrw-layout-list .gmrw-author-image {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .gmrw-layout-list .gmrw-review-text {
+        font-size: 0.95rem;
+    }
+}
+
+/* ==========================================================================
+   List Layout Dark Mode
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .gmrw-layout-list .gmrw-review {
+        background: #2c3e50;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-list .gmrw-review:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border-color: #007cba;
+    }
+    
+    .gmrw-layout-list .gmrw-author-name {
+        color: #fff;
+    }
+    
+    .gmrw-layout-list .gmrw-review-text {
+        color: #e9ecef;
+    }
+    
+    .gmrw-layout-list .gmrw-review-footer {
+        border-top-color: #495057;
+    }
+    
+    .gmrw-layout-list .gmrw-owner-response {
+        background: #495057;
+        border-left-color: #28a745;
+    }
+    
+    .gmrw-layout-list .gmrw-owner-response-text {
+        color: #e9ecef;
+    }
+}
+
+/* ==========================================================================
+   List Layout Print Styles
+   ========================================================================== */
+
+@media print {
+    .gmrw-layout-list .gmrw-review {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+    
+    .gmrw-layout-list .gmrw-review:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .gmrw-layout-list .gmrw-review::before {
+        display: none;
+    }
+    
+    .gmrw-layout-list .gmrw-owner-response::before {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   List Layout High Contrast Mode
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+    .gmrw-layout-list .gmrw-review {
+        border-width: 2px;
+    }
+    
+    .gmrw-layout-list .gmrw-review:hover {
+        border-width: 3px;
+    }
+    
+    .gmrw-layout-list .gmrw-review::before {
+        height: 6px;
+    }
+}
+
+/* ==========================================================================
+   List Layout Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .gmrw-layout-list .gmrw-review,
+    .gmrw-layout-list .gmrw-read-more,
+    .gmrw-layout-list .gmrw-read-more-response {
+        transition: none;
+    }
+    
+    .gmrw-layout-list .gmrw-review:hover {
+        transform: none;
+    }
+    
+    .gmrw-layout-list .gmrw-review::before {
+        transition: none;
+    }
+}

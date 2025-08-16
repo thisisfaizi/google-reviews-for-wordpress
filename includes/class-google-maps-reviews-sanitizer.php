@@ -46,6 +46,11 @@ class Google_Maps_Reviews_Sanitizer {
         $sanitized['show_author_image'] = self::sanitize_boolean($instance['show_author_image'] ?? true);
         $sanitized['show_helpful_votes'] = self::sanitize_boolean($instance['show_helpful_votes'] ?? false);
         $sanitized['show_owner_response'] = self::sanitize_boolean($instance['show_owner_response'] ?? false);
+        $sanitized['show_pagination'] = self::sanitize_boolean($instance['show_pagination'] ?? false);
+        $sanitized['show_review_count'] = self::sanitize_boolean($instance['show_review_count'] ?? true);
+
+        // Sanitize numeric fields
+        $sanitized['reviews_per_page'] = self::sanitize_int_range($instance['reviews_per_page'] ?? 5, 1, 20);
 
         return $sanitized;
     }
@@ -81,6 +86,11 @@ class Google_Maps_Reviews_Sanitizer {
         $sanitized['show_helpful_votes'] = self::sanitize_boolean($attributes['show_helpful_votes'] ?? false);
         $sanitized['show_owner_response'] = self::sanitize_boolean($attributes['show_owner_response'] ?? false);
         $sanitized['show_business_info'] = self::sanitize_boolean($attributes['show_business_info'] ?? true);
+        $sanitized['show_pagination'] = self::sanitize_boolean($attributes['show_pagination'] ?? false);
+        $sanitized['show_review_count'] = self::sanitize_boolean($attributes['show_review_count'] ?? true);
+
+        // Sanitize numeric fields
+        $sanitized['reviews_per_page'] = self::sanitize_int_range($attributes['reviews_per_page'] ?? 5, 1, 20);
 
         return $sanitized;
     }

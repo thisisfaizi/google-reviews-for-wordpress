@@ -71,6 +71,8 @@ class Google_Maps_Reviews_Autoloader {
             'Google_Maps_Reviews_Shortcode' => 'includes/class-google-maps-reviews-shortcode.php',
             'Google_Maps_Reviews_Cache' => 'includes/class-google-maps-reviews-cache.php',
             'Google_Maps_Reviews_Display' => 'includes/class-google-maps-reviews-display.php',
+            'Google_Maps_Reviews_Templates' => 'includes/class-google-maps-reviews-templates.php',
+            'Google_Maps_Reviews_Filter' => 'includes/class-google-maps-reviews-filter.php',
             'Google_Maps_Reviews_Autoloader' => 'includes/class-google-maps-reviews-autoloader.php',
             
             // Admin classes
