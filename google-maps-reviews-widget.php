@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Google Maps Reviews Widget
- * Plugin URI: https://github.com/your-username/google-maps-reviews-widget
+ * Plugin URI: https://github.com/thisisfaizi/google-reviews-for-wordpress
  * Description: Display Google Maps business reviews on your WordPress website using a widget or shortcode. No API key required - simply enter your Google Maps business URL.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com
+ * Author: nowdigiverse
+ * Author URI: https://nowdigiverse.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: google-maps-reviews-widget
@@ -17,7 +17,7 @@
  *
  * @package GoogleMapsReviewsWidget
  * @version 1.0.0
- * @author Your Name
+ * @author nowdigiverse
  * @license GPL v2 or later
  */
 

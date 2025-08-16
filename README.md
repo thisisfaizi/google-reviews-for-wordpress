@@ -2,6 +2,8 @@
 
 A WordPress plugin that displays Google Maps business reviews on your website using a widget or shortcode. No API key required - simply enter your Google Maps business URL.
 
+**GitHub Repository:** [https://github.com/thisisfaizi/google-reviews-for-wordpress](https://github.com/thisisfaizi/google-reviews-for-wordpress)
+
 ## Directory Structure
 
 ```
@@ -42,7 +44,7 @@ google-maps-reviews-widget/
 
 ## Installation
 
-1. Upload the plugin files to `/wp-content/plugins/google-maps-reviews-widget/`
+1. Download the plugin from [GitHub](https://github.com/thisisfaizi/google-reviews-for-wordpress) or upload the plugin files to `/wp-content/plugins/google-maps-reviews-widget/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Configure the plugin in the admin settings
 4. Add the widget to your sidebar or use the shortcode `[google_maps_reviews]`
