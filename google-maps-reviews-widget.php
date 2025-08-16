@@ -34,6 +34,8 @@ define('GMRW_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('GMRW_PLUGIN_BASENAME', plugin_basename(__FILE__));
 define('GMRW_PLUGIN_NAME', 'Google Maps Reviews Widget');
 define('GMRW_PLUGIN_SLUG', 'google-maps-reviews-widget');
+define('GMRW_AUTHOR', 'nowdigiverse');
+define('GMRW_AUTHOR_URI', 'https://nowdigiverse.com');
 
 // Database and option constants
 define('GMRW_OPTION_SETTINGS', 'gmrw_settings');
