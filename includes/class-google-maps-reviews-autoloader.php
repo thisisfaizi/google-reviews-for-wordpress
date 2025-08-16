@@ -80,9 +80,10 @@ class Google_Maps_Reviews_Autoloader {
             
             // Utility classes
             'Google_Maps_Reviews_Logger' => 'includes/class-google-maps-reviews-logger.php',
-                            'Google_Maps_Reviews_Validator' => 'includes/class-google-maps-reviews-validator.php',
-                'Google_Maps_Reviews_Sanitizer' => 'includes/class-google-maps-reviews-sanitizer.php',
+            'Google_Maps_Reviews_Validator' => 'includes/class-google-maps-reviews-validator.php',
+            'Google_Maps_Reviews_Sanitizer' => 'includes/class-google-maps-reviews-sanitizer.php',
             'Google_Maps_Reviews_Helper' => 'includes/class-google-maps-reviews-helper.php',
+            'Google_Maps_Reviews_Minifier' => 'includes/class-google-maps-reviews-minifier.php',
             
             // Exception classes
             'Google_Maps_Reviews_Exception' => 'includes/exceptions/class-google-maps-reviews-exception.php',

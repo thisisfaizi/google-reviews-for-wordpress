@@ -53,6 +53,8 @@ class Google_Maps_Reviews_Admin {
         add_action('wp_ajax_gmrw_export_settings', array($this, 'ajax_export_settings'));
         add_action('wp_ajax_gmrw_import_settings', array($this, 'ajax_import_settings'));
         add_action('wp_ajax_gmrw_test_connection', array($this, 'ajax_test_connection'));
+        add_action('wp_ajax_gmrw_minify_assets', array($this, 'ajax_minify_assets'));
+        add_action('wp_ajax_gmrw_get_performance_stats', array($this, 'ajax_get_performance_stats'));
     }
     
     /**
@@ -543,6 +545,64 @@ class Google_Maps_Reviews_Admin {
         }
         
         wp_send_json_success(__('Connection test successful', GMRW_TEXT_DOMAIN));
+    }
+    
+    /**
+     * AJAX handler for minifying assets
+     */
+    public function ajax_minify_assets() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+            wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+        }
+        
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+        }
+        
+        try {
+            $results = Google_Maps_Reviews_Minifier::minify_all_assets();
+            $stats = Google_Maps_Reviews_Minifier::get_optimization_stats();
+            
+            wp_send_json_success(array(
+                'message' => __('Assets minified successfully', GMRW_TEXT_DOMAIN),
+                'results' => $results,
+                'stats' => $stats
+            ));
+        } catch (Exception $e) {
+            wp_send_json_error(__('Minification failed: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+        }
+    }
+    
+    /**
+     * AJAX handler for getting performance stats
+     */
+    public function ajax_get_performance_stats() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+            wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+        }
+        
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+        }
+        
+        try {
+            $cache = new Google_Maps_Reviews_Cache();
+            $cache_stats = $cache->get_cache_stats();
+            $cache_metrics = $cache->get_performance_metrics();
+            $optimization_stats = Google_Maps_Reviews_Minifier::get_optimization_stats();
+            
+            wp_send_json_success(array(
+                'cache_stats' => $cache_stats,
+                'cache_metrics' => $cache_metrics,
+                'optimization_stats' => $optimization_stats
+            ));
+        } catch (Exception $e) {
+            wp_send_json_error(__('Failed to get performance stats: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+        }
     }
     
     // Settings field renderers

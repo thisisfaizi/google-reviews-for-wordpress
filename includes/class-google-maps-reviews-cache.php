@@ -288,4 +288,145 @@ class Google_Maps_Reviews_Cache {
     public function get_cache_duration() {
         return $this->default_duration;
     }
+    
+    /**
+     * Warm up cache for a business URL
+     *
+     * @param string $business_url The business URL
+     * @return bool True on success, false on failure
+     */
+    public function warm_cache($business_url) {
+        if (empty($business_url)) {
+            return false;
+        }
+        
+        try {
+            // Get fresh data from scraper
+            $scraper = new Google_Maps_Reviews_Scraper();
+            $reviews = $scraper->scrape_reviews($business_url);
+            $business_info = $scraper->scrape_business_info($business_url);
+            
+            if ($reviews !== false) {
+                $this->set_reviews($business_url, $reviews);
+            }
+            
+            if ($business_info !== false) {
+                $this->set_business_info($business_url, $business_info);
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            // Log error but don't fail
+            if (class_exists('Google_Maps_Reviews_Logger')) {
+                $logger = new Google_Maps_Reviews_Logger();
+                $logger->error('Cache warming failed for URL: ' . $business_url, array('error' => $e->getMessage()));
+            }
+            return false;
+        }
+    }
+    
+    /**
+     * Schedule background cache refresh
+     *
+     * @param string $business_url The business URL
+     * @param int $delay Delay in seconds before refresh
+     * @return bool True on success, false on failure
+     */
+    public function schedule_cache_refresh($business_url, $delay = 300) {
+        if (empty($business_url)) {
+            return false;
+        }
+        
+        $cache_key = $this->get_cache_key($business_url);
+        $refresh_key = $cache_key . '_refresh_scheduled';
+        
+        // Check if already scheduled
+        if (get_transient($refresh_key)) {
+            return true;
+        }
+        
+        // Schedule the refresh
+        $scheduled = wp_schedule_single_event(time() + $delay, 'gmrw_refresh_cache', array($business_url));
+        
+        if ($scheduled) {
+            set_transient($refresh_key, true, $delay + 60);
+        }
+        
+        return $scheduled;
+    }
+    
+    /**
+     * Handle background cache refresh
+     *
+     * @param string $business_url The business URL
+     */
+    public function handle_background_refresh($business_url) {
+        if (empty($business_url)) {
+            return;
+        }
+        
+        // Warm up cache
+        $this->warm_cache($business_url);
+        
+        // Clear refresh flag
+        $cache_key = $this->get_cache_key($business_url);
+        $refresh_key = $cache_key . '_refresh_scheduled';
+        delete_transient($refresh_key);
+    }
+    
+    /**
+     * Get cache performance metrics
+     *
+     * @return array Performance metrics
+     */
+    public function get_performance_metrics() {
+        $stats = $this->get_cache_stats();
+        
+        // Calculate hit rate
+        $total_requests = get_option('gmrw_cache_requests', 0);
+        $cache_hits = get_option('gmrw_cache_hits', 0);
+        $hit_rate = $total_requests > 0 ? ($cache_hits / $total_requests) * 100 : 0;
+        
+        // Calculate average response time
+        $total_time = get_option('gmrw_cache_total_time', 0);
+        $avg_response_time = $total_requests > 0 ? $total_time / $total_requests : 0;
+        
+        return array(
+            'total_requests' => $total_requests,
+            'cache_hits' => $cache_hits,
+            'cache_misses' => $total_requests - $cache_hits,
+            'hit_rate' => round($hit_rate, 2),
+            'avg_response_time' => round($avg_response_time, 4),
+            'cache_size' => $stats['total_size_formatted'],
+            'cache_items' => $stats['total_items']
+        );
+    }
+    
+    /**
+     * Record cache access
+     *
+     * @param bool $hit Whether it was a cache hit
+     * @param float $response_time Response time in seconds
+     */
+    public function record_cache_access($hit, $response_time = 0) {
+        $requests = get_option('gmrw_cache_requests', 0);
+        $hits = get_option('gmrw_cache_hits', 0);
+        $total_time = get_option('gmrw_cache_total_time', 0);
+        
+        update_option('gmrw_cache_requests', $requests + 1);
+        update_option('gmrw_cache_total_time', $total_time + $response_time);
+        
+        if ($hit) {
+            update_option('gmrw_cache_hits', $hits + 1);
+        }
+    }
+    
+    /**
+     * Reset performance metrics
+     */
+    public function reset_performance_metrics() {
+        delete_option('gmrw_cache_requests');
+        delete_option('gmrw_cache_hits');
+        delete_option('gmrw_cache_total_time');
+    }
 }

@@ -78,6 +78,7 @@ class Google_Maps_Reviews_Init {
         
         // Cron hooks
         add_action(GMRW_CRON_HOOK, array($this, 'cron_refresh_reviews'));
+        add_action('gmrw_refresh_cache', array($this, 'handle_background_cache_refresh'));
         add_filter('cron_schedules', array($this, 'add_cron_intervals'));
         
         // Activation/deactivation hooks
@@ -339,9 +340,11 @@ class Google_Maps_Reviews_Init {
         $settings = Google_Maps_Reviews_Config::get_settings();
         
         // Enqueue main CSS file
+        // Enqueue main CSS
+        $css_url = Google_Maps_Reviews_Minifier::get_asset_url('assets/css/google-maps-reviews.css');
         wp_enqueue_style(
             'google-maps-reviews-widget',
-            GMRW_PLUGIN_URL . 'assets/css/google-maps-reviews.css',
+            $css_url,
             array(),
             GMRW_VERSION
         );
@@ -394,9 +397,11 @@ class Google_Maps_Reviews_Init {
         );
         
         // Enqueue main JavaScript file last
+        // Enqueue main JavaScript
+        $js_url = Google_Maps_Reviews_Minifier::get_asset_url('assets/js/google-maps-reviews.js');
         wp_enqueue_script(
             'google-maps-reviews-widget',
-            GMRW_PLUGIN_URL . 'assets/js/google-maps-reviews.js',
+            $js_url,
             array('jquery', 'google-maps-reviews-utils', 'google-maps-reviews-carousel', 'google-maps-reviews-filters', 'google-maps-reviews-pagination'),
             GMRW_VERSION,
             true
@@ -535,6 +540,21 @@ class Google_Maps_Reviews_Init {
         
         $scraper = new Google_Maps_Reviews_Scraper();
         $scraper->get_reviews($business_url);
+    }
+    
+    /**
+     * Handle background cache refresh
+     *
+     * @param string $business_url The business URL to refresh
+     */
+    public function handle_background_cache_refresh($business_url) {
+        if (empty($business_url)) {
+            return;
+        }
+        
+        // Initialize cache and handle refresh
+        $cache = new Google_Maps_Reviews_Cache();
+        $cache->handle_background_refresh($business_url);
     }
     
     /**
