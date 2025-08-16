@@ -65,6 +65,7 @@ class Google_Maps_Reviews_Autoloader {
             'Google_Maps_Reviews_Deactivator' => 'includes/class-google-maps-reviews-deactivator.php',
             'Google_Maps_Reviews_Uninstall' => 'includes/class-google-maps-reviews-uninstall.php',
             'Google_Maps_Reviews_Config' => 'includes/class-google-maps-reviews-config.php',
+            'Google_Maps_Reviews_Init' => 'includes/class-google-maps-reviews-init.php',
             'Google_Maps_Reviews_Scraper' => 'includes/class-google-maps-reviews-scraper.php',
             'Google_Maps_Reviews_Widget' => 'includes/class-google-maps-reviews-widget.php',
             'Google_Maps_Reviews_Shortcode' => 'includes/class-google-maps-reviews-shortcode.php',

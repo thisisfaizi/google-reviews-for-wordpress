@@ -80,135 +80,13 @@ define('GMRW_LOG_LEVEL_DEBUG', 'debug');
 define('GMRW_TEXT_DOMAIN', 'google-maps-reviews-widget');
 define('GMRW_DOMAIN_PATH', '/languages');
 
-// Plugin activation hook
-register_activation_hook(__FILE__, array('Google_Maps_Reviews_Activator', 'activate'));
-
-// Plugin deactivation hook
-register_deactivation_hook(__FILE__, array('Google_Maps_Reviews_Deactivator', 'deactivate'));
-
-// Plugin uninstall hook
-register_uninstall_hook(__FILE__, array('Google_Maps_Reviews_Uninstall', 'uninstall'));
-
-
-
 /**
  * Initialize the plugin
  */
 function gmrw_init() {
-    // Load text domain for translations
-    load_plugin_textdomain(GMRW_TEXT_DOMAIN, false, dirname(GMRW_PLUGIN_BASENAME) . GMRW_DOMAIN_PATH);
-    
-    // Initialize autoloader
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-autoloader.php';
-    Google_Maps_Reviews_Autoloader::register();
-    
-    // Initialize admin functionality
-    if (is_admin()) {
-        require_once GMRW_PLUGIN_DIR . 'admin/class-google-maps-reviews-admin.php';
-        new Google_Maps_Reviews_Admin();
-    }
-    
-    // Register widget
-    add_action('widgets_init', 'gmrw_register_widget');
-    
-    // Register shortcode
-    add_action('init', 'gmrw_register_shortcode');
-    
-    // Enqueue frontend assets
-    add_action('wp_enqueue_scripts', 'gmrw_enqueue_scripts');
-    
-    // Schedule review refresh if enabled
-    if (!wp_next_scheduled(GMRW_CRON_HOOK)) {
-        $settings = Google_Maps_Reviews_Config::get_settings();
-        if (!empty($settings['auto_refresh'])) {
-            wp_schedule_event(time(), GMRW_CRON_INTERVAL, GMRW_CRON_HOOK);
-        }
-    }
-}
-
-/**
- * Register the widget
- */
-function gmrw_register_widget() {
-    register_widget('Google_Maps_Reviews_Widget');
-}
-
-/**
- * Register the shortcode
- */
-function gmrw_register_shortcode() {
-    add_shortcode('google_maps_reviews', array('Google_Maps_Reviews_Shortcode', 'render'));
-}
-
-/**
- * Enqueue frontend scripts and styles
- */
-function gmrw_enqueue_scripts() {
-    wp_enqueue_style(
-        'google-maps-reviews-widget',
-        GMRW_PLUGIN_URL . 'assets/css/google-maps-reviews.css',
-        array(),
-        GMRW_VERSION
-    );
-    
-    wp_enqueue_script(
-        'google-maps-reviews-widget',
-        GMRW_PLUGIN_URL . 'assets/js/google-maps-reviews.js',
-        array('jquery'),
-        GMRW_VERSION,
-        true
-    );
-    
-    // Localize script for AJAX
-    wp_localize_script('google-maps-reviews-widget', 'gmrw_ajax', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce(GMRW_NONCE_ACTION),
-        'strings' => array(
-            'loading' => __('Loading reviews...', GMRW_TEXT_DOMAIN),
-            'error' => __('Error loading reviews', GMRW_TEXT_DOMAIN),
-            'no_reviews' => __('No reviews available', GMRW_TEXT_DOMAIN)
-        )
-    ));
+    // Initialize the plugin using the comprehensive initialization class
+    Google_Maps_Reviews_Init::get_instance();
 }
 
 // Initialize plugin after WordPress is loaded
-add_action('plugins_loaded', 'gmrw_init');
-
-// Handle AJAX requests
-add_action('wp_ajax_' . GMRW_AJAX_REFRESH_REVIEWS, 'gmrw_ajax_refresh_reviews');
-add_action('wp_ajax_nopriv_' . GMRW_AJAX_REFRESH_REVIEWS, 'gmrw_ajax_refresh_reviews');
-
-/**
- * AJAX handler for refreshing reviews
- */
-function gmrw_ajax_refresh_reviews() {
-    // Verify nonce
-    if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
-        wp_die(__('Security check failed', GMRW_TEXT_DOMAIN));
-    }
-    
-    // Check user capabilities
-    if (!Google_Maps_Reviews_Config::user_can('refresh_reviews')) {
-        wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
-    }
-    
-    $business_url = sanitize_url($_POST['business_url']);
-    if (empty($business_url)) {
-        wp_send_json_error(__('Business URL is required', GMRW_TEXT_DOMAIN));
-    }
-    
-    // Validate business URL
-    if (!Google_Maps_Reviews_Config::validate_business_url($business_url)) {
-        wp_send_json_error(__('Invalid Google Maps business URL', GMRW_TEXT_DOMAIN));
-    }
-    
-    // Initialize scraper and get reviews
-    $scraper = new Google_Maps_Reviews_Scraper();
-    $reviews = $scraper->get_reviews($business_url);
-    
-    if (is_wp_error($reviews)) {
-        wp_send_json_error($reviews->get_error_message());
-    }
-    
-    wp_send_json_success($reviews);
-}
+add_action('plugins_loaded', 'gmrw_init', 0);

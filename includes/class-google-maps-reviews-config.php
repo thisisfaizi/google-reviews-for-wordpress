@@ -292,6 +292,214 @@ class Google_Maps_Reviews_Config {
     }
     
     /**
+     * Parse and validate Google Maps business URL
+     *
+     * @param string $url Business URL
+     * @return array|false Parsed URL data or false on failure
+     */
+    public static function parse_business_url($url) {
+        if (!self::validate_business_url($url)) {
+            return false;
+        }
+        
+        $parsed = array(
+            'original_url' => $url,
+            'place_id' => '',
+            'business_name' => '',
+            'url_type' => '',
+            'is_valid' => false,
+            'errors' => array(),
+        );
+        
+        // Extract place ID using various patterns
+        $place_id = self::extract_place_id_from_url($url);
+        if ($place_id) {
+            $parsed['place_id'] = $place_id;
+            $parsed['is_valid'] = true;
+        } else {
+            $parsed['errors'][] = __('Could not extract place ID from URL', GMRW_TEXT_DOMAIN);
+        }
+        
+        // Determine URL type
+        $parsed['url_type'] = self::get_url_type($url);
+        
+        // Extract business name if possible
+        $parsed['business_name'] = self::extract_business_name_from_url($url);
+        
+        return $parsed;
+    }
+    
+    /**
+     * Extract place ID from Google Maps URL
+     *
+     * @param string $url Google Maps URL
+     * @return string|false Place ID or false on failure
+     */
+    public static function extract_place_id_from_url($url) {
+        // Common patterns for Google Maps URLs
+        $patterns = array(
+            // maps.google.com/maps/place/Business+Name/place_id
+            '/maps\.google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
+            // maps.google.com/maps?cid=place_id
+            '/maps\.google\.com\/maps\?.*cid=([^&\s]+)/',
+            // maps.google.com/maps?q=place_id:place_id
+            '/maps\.google\.com\/maps\?.*q=place_id:([^&\s]+)/',
+            // goo.gl/maps/place_id
+            '/goo\.gl\/maps\/([^\/\?]+)/',
+            // google.com/maps/place/Business+Name/place_id
+            '/google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
+            // maps.google.com/maps/place/place_id
+            '/maps\.google\.com\/maps\/place\/([^\/\?]+)/',
+            // google.com/maps/place/place_id
+            '/google\.com\/maps\/place\/([^\/\?]+)/',
+        );
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                $place_id = $matches[1];
+                
+                // Validate place ID format
+                if (self::is_valid_place_id($place_id)) {
+                    return $place_id;
+                }
+            }
+        }
+        
+        // Try to extract from any URL with place_id parameter
+        if (preg_match('/place_id=([^&\s]+)/', $url, $matches)) {
+            $place_id = $matches[1];
+            if (self::is_valid_place_id($place_id)) {
+                return $place_id;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Validate place ID format
+     *
+     * @param string $place_id Place ID to validate
+     * @return bool
+     */
+    public static function is_valid_place_id($place_id) {
+        if (empty($place_id)) {
+            return false;
+        }
+        
+        // Google Place IDs are typically alphanumeric and can contain special characters
+        // They usually start with a letter and are 27 characters long
+        if (preg_match('/^[A-Za-z0-9_-]{20,}$/', $place_id)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Extract business name from URL
+     *
+     * @param string $url Google Maps URL
+     * @return string Business name or empty string
+     */
+    public static function extract_business_name_from_url($url) {
+        // Try to extract business name from URL path
+        $patterns = array(
+            // maps.google.com/maps/place/Business+Name/place_id
+            '/maps\.google\.com\/maps\/place\/([^\/]+)\/[^\/\?]+/',
+            // google.com/maps/place/Business+Name/place_id
+            '/google\.com\/maps\/place\/([^\/]+)\/[^\/\?]+/',
+        );
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                $business_name = urldecode($matches[1]);
+                $business_name = str_replace('+', ' ', $business_name);
+                return trim($business_name);
+            }
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Get URL type
+     *
+     * @param string $url Google Maps URL
+     * @return string URL type
+     */
+    public static function get_url_type($url) {
+        if (strpos($url, 'maps.google.com') !== false) {
+            if (strpos($url, '/maps/place/') !== false) {
+                return 'place_page';
+            } elseif (strpos($url, '?cid=') !== false) {
+                return 'cid_parameter';
+            } elseif (strpos($url, '?q=place_id:') !== false) {
+                return 'place_id_query';
+            } else {
+                return 'maps_general';
+            }
+        } elseif (strpos($url, 'google.com/maps') !== false) {
+            return 'google_maps';
+        } elseif (strpos($url, 'goo.gl/maps') !== false) {
+            return 'shortened';
+        } else {
+            return 'unknown';
+        }
+    }
+    
+    /**
+     * Normalize Google Maps URL
+     *
+     * @param string $url Google Maps URL
+     * @return string|false Normalized URL or false on failure
+     */
+    public static function normalize_business_url($url) {
+        $parsed = self::parse_business_url($url);
+        
+        if (!$parsed || !$parsed['is_valid']) {
+            return false;
+        }
+        
+        // Return a standardized URL format
+        return 'https://www.google.com/maps/place/' . $parsed['place_id'];
+    }
+    
+    /**
+     * Get URL validation errors
+     *
+     * @param string $url Business URL
+     * @return array Array of validation errors
+     */
+    public static function get_url_validation_errors($url) {
+        $errors = array();
+        
+        if (empty($url)) {
+            $errors[] = __('Business URL is required', GMRW_TEXT_DOMAIN);
+            return $errors;
+        }
+        
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            $errors[] = __('Invalid URL format', GMRW_TEXT_DOMAIN);
+            return $errors;
+        }
+        
+        if (!self::validate_business_url($url)) {
+            $errors[] = __('URL must be a valid Google Maps business URL', GMRW_TEXT_DOMAIN);
+            return $errors;
+        }
+        
+        $place_id = self::extract_place_id_from_url($url);
+        if (!$place_id) {
+            $errors[] = __('Could not extract place ID from URL', GMRW_TEXT_DOMAIN);
+        } elseif (!self::is_valid_place_id($place_id)) {
+            $errors[] = __('Invalid place ID format', GMRW_TEXT_DOMAIN);
+        }
+        
+        return $errors;
+    }
+    
+    /**
      * Get cache key for business URL
      *
      * @param string $business_url Business URL

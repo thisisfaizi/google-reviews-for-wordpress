@@ -32,16 +32,16 @@
   - [x] 1.3 Create activation, deactivation, and uninstall hooks
   - [x] 1.4 Implement plugin autoloader and class loading system
   - [x] 1.5 Add plugin constants and configuration variables
-  - [ ] 1.6 Create basic plugin initialization and hook registration
+  - [x] 1.6 Create basic plugin initialization and hook registration
 
 - [ ] 2.0 Google Maps Review Scraping System
-  - [ ] 2.1 Create scraper class with HTTP request handling using WordPress HTTP API
-  - [ ] 2.2 Implement Google Maps business URL parsing and validation
-  - [ ] 2.3 Develop HTML parsing logic to extract review data (name, image, content, rating, date, votes, responses)
-  - [ ] 2.4 Add rate limiting and request delays to respect Google's terms of service
-  - [ ] 2.5 Implement error handling for network failures and parsing errors
-  - [ ] 2.6 Create review data structure and validation methods
-  - [ ] 2.7 Add support for pagination and multiple review pages
+  - [x] 2.1 Create scraper class with HTTP request handling using WordPress HTTP API
+  - [x] 2.2 Implement Google Maps business URL parsing and validation
+  - [x] 2.3 Develop HTML parsing logic to extract review data (name, image, content, rating, date, votes, responses)
+  - [x] 2.4 Add rate limiting and request delays to respect Google's terms of service
+  - [x] 2.5 Implement error handling for network failures and parsing errors
+  - [x] 2.6 Create review data structure and validation methods
+  - [x] 2.7 Add support for pagination and multiple review pages
 
 - [ ] 3.0 WordPress Widget and Shortcode Integration
   - [ ] 3.1 Create WordPress widget class extending WP_Widget
