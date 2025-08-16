@@ -29,8 +29,8 @@
 - [ ] 1.0 Plugin Foundation and Core Structure
   - [x] 1.1 Create main plugin file with WordPress plugin header and basic initialization
   - [x] 1.2 Set up plugin directory structure (includes, admin, assets, languages)
-  - [ ] 1.3 Create activation, deactivation, and uninstall hooks
-  - [ ] 1.4 Implement plugin autoloader and class loading system
+  - [x] 1.3 Create activation, deactivation, and uninstall hooks
+  - [x] 1.4 Implement plugin autoloader and class loading system
   - [ ] 1.5 Add plugin constants and configuration variables
   - [ ] 1.6 Create basic plugin initialization and hook registration
 

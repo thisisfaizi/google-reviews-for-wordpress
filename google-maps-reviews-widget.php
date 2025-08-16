@@ -36,57 +36,15 @@ define('GMRW_PLUGIN_NAME', 'Google Maps Reviews Widget');
 define('GMRW_PLUGIN_SLUG', 'google-maps-reviews-widget');
 
 // Plugin activation hook
-register_activation_hook(__FILE__, 'gmrw_activate');
+register_activation_hook(__FILE__, array('Google_Maps_Reviews_Activator', 'activate'));
 
 // Plugin deactivation hook
-register_deactivation_hook(__FILE__, 'gmrw_deactivate');
+register_deactivation_hook(__FILE__, array('Google_Maps_Reviews_Deactivator', 'deactivate'));
 
 // Plugin uninstall hook
-register_uninstall_hook(__FILE__, 'gmrw_uninstall');
+register_uninstall_hook(__FILE__, array('Google_Maps_Reviews_Uninstall', 'uninstall'));
 
-/**
- * Plugin activation function
- */
-function gmrw_activate() {
-    // Create necessary database tables or options
-    add_option('gmrw_version', GMRW_VERSION);
-    add_option('gmrw_settings', array(
-        'cache_duration' => 3600, // 1 hour default
-        'max_reviews' => 10,
-        'default_layout' => 'list',
-        'auto_refresh' => true,
-        'refresh_interval' => 86400 // 24 hours
-    ));
-    
-    // Flush rewrite rules
-    flush_rewrite_rules();
-}
 
-/**
- * Plugin deactivation function
- */
-function gmrw_deactivate() {
-    // Clear scheduled events
-    wp_clear_scheduled_hook('gmrw_refresh_reviews');
-    
-    // Flush rewrite rules
-    flush_rewrite_rules();
-}
-
-/**
- * Plugin uninstall function
- */
-function gmrw_uninstall() {
-    // Remove all plugin options
-    delete_option('gmrw_version');
-    delete_option('gmrw_settings');
-    delete_option('gmrw_cache');
-    
-    // Clear all transients
-    global $wpdb;
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_gmrw_%'");
-    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_gmrw_%'");
-}
 
 /**
  * Initialize the plugin
@@ -95,12 +53,9 @@ function gmrw_init() {
     // Load text domain for translations
     load_plugin_textdomain('google-maps-reviews-widget', false, dirname(GMRW_PLUGIN_BASENAME) . '/languages');
     
-    // Include required files
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-scraper.php';
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-widget.php';
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-shortcode.php';
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-cache.php';
-    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-display.php';
+    // Initialize autoloader
+    require_once GMRW_PLUGIN_DIR . 'includes/class-google-maps-reviews-autoloader.php';
+    Google_Maps_Reviews_Autoloader::register();
     
     // Initialize admin functionality
     if (is_admin()) {
