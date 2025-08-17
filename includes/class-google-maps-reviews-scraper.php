@@ -1570,25 +1570,33 @@ class Google_Maps_Reviews_Scraper {
             return false;
         }
         
-        // Check for common error indicators
-        $error_indicators = array(
-            'error',
-            'not found',
-            'access denied',
-            'forbidden',
-            'blocked',
-            'captcha',
-            'robot',
-            'automated',
-        );
-        
-        $html_lower = strtolower($html);
-        foreach ($error_indicators as $indicator) {
-            if (strpos($html_lower, $indicator) !== false) {
-                $this->log_error('validation_error', "HTML contains error indicator: {$indicator}");
-                return false;
-            }
-        }
+                 // Check for common error indicators (but be more specific to avoid false positives)
+         $error_indicators = array(
+             'error 404',
+             'page not found',
+             'access denied',
+             'forbidden',
+             'blocked',
+             'captcha',
+             'robot',
+             'automated',
+             'security check',
+             'unusual traffic',
+         );
+         
+         $html_lower = strtolower($html);
+         foreach ($error_indicators as $indicator) {
+             if (strpos($html_lower, $indicator) !== false) {
+                 $this->log_error('validation_error', "HTML contains error indicator: {$indicator}");
+                 return false;
+             }
+         }
+         
+         // Check for Google Maps specific error pages
+         if (strpos($html_lower, 'sorry') !== false && strpos($html_lower, 'maps') !== false) {
+             $this->log_error('validation_error', "HTML appears to be Google Maps error page");
+             return false;
+         }
         
         return true;
     }
@@ -1763,14 +1771,22 @@ class Google_Maps_Reviews_Scraper {
              $this->log_error('debug_info', 'Direct approaches failed, trying search approach', array());
              $search_url = 'https://www.google.com/maps/search/' . urlencode($business_name);
              
-             // Fetch the search results page
-             $html = $this->fetch_url($search_url);
-             if (!$html) {
-                 throw new Google_Maps_Reviews_Scraping_Exception(
-                     __('Failed to fetch search results page', GMRW_TEXT_DOMAIN),
-                     'FETCH_FAILED'
-                 );
-             }
+                           // Fetch the search results page
+              $html = $this->fetch_url($search_url);
+              if (!$html) {
+                  $this->log_error('debug_info', 'Search results page fetch failed, trying alternative search URL', array());
+                  
+                  // Try alternative search URL
+                  $alt_search_url = 'https://www.google.com/maps/search/' . urlencode($business_name) . '?hl=en';
+                  $html = $this->fetch_url($alt_search_url);
+                  
+                  if (!$html) {
+                      throw new Google_Maps_Reviews_Scraping_Exception(
+                          __('Failed to fetch search results page', GMRW_TEXT_DOMAIN),
+                          'FETCH_FAILED'
+                      );
+                  }
+              }
              
              // Extract the first business URL from search results
              $business_url = $this->extract_first_business_url($html, $business_name);
@@ -1787,12 +1803,24 @@ class Google_Maps_Reviews_Scraper {
                  return $reviews;
              }
              
-             // Approach 4: Try OneFoundry library as final fallback
-             $this->log_error('debug_info', 'All built-in approaches failed, trying OneFoundry library', array());
-             $onefoundry_reviews = $this->try_onefoundry_library($business_name, $options);
-             if (!is_wp_error($onefoundry_reviews) && !empty($onefoundry_reviews)) {
-                 return $onefoundry_reviews;
-             }
+                           // Approach 4: Try direct business URL construction
+              $this->log_error('debug_info', 'Search approach failed, trying direct business URL construction', array());
+              $direct_business_url = 'https://www.google.com/maps/place/' . urlencode($business_name);
+              $html = $this->fetch_url($direct_business_url);
+              if ($html) {
+                  $reviews = $this->parse_reviews_response($html);
+                  if (!empty($reviews)) {
+                      $this->log_error('debug_info', 'Successfully found ' . count($reviews) . ' reviews using direct business URL', array());
+                      return $reviews;
+                  }
+              }
+              
+              // Approach 5: Try OneFoundry library as final fallback
+              $this->log_error('debug_info', 'All built-in approaches failed, trying OneFoundry library', array());
+              $onefoundry_reviews = $this->try_onefoundry_library($business_name, $options);
+              if (!is_wp_error($onefoundry_reviews) && !empty($onefoundry_reviews)) {
+                  return $onefoundry_reviews;
+              }
              
              // If all approaches failed, return the last error or empty result
              if (is_wp_error($reviews)) {
