@@ -411,39 +411,56 @@ class Google_Maps_Reviews_Scraper {
      * @param string $url URL to request
      * @return array|WP_Error Response array or WP_Error on failure
      */
-    private function make_request($url) {
-        // Check robots.txt before making request
-        if (!$this->check_robots_txt($url)) {
-            return new WP_Error(
-                'robots_txt_disallowed',
-                __('URL is disallowed by robots.txt', GMRW_TEXT_DOMAIN),
-                array('url' => $url)
-            );
-        }
-        
-        // Apply rate limiting
-        $this->rate_limit();
-        
-        $settings = Google_Maps_Reviews_Config::get_settings();
-        
-        $args = array(
-            'timeout' => $this->timeout,
-            'user-agent' => $this->user_agent,
-            'headers' => array(
-                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language' => 'en-US,en;q=0.5',
-                'Accept-Encoding' => 'gzip, deflate',
-                'Connection' => 'keep-alive',
-                'Upgrade-Insecure-Requests' => '1',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache',
-                'Referer' => 'https://www.google.com/',
-            ),
-            'sslverify' => false, // Some servers have SSL issues
-            'redirection' => 5,
-            'blocking' => true,
-            'cookies' => array(),
-        );
+         private function make_request($url) {
+         // Check robots.txt before making request
+         if (!$this->check_robots_txt($url)) {
+             return new WP_Error(
+                 'robots_txt_disallowed',
+                 __('URL is disallowed by robots.txt', GMRW_TEXT_DOMAIN),
+                 array('url' => $url)
+             );
+         }
+         
+         // Apply rate limiting
+         $this->rate_limit();
+         
+         $settings = Google_Maps_Reviews_Config::get_settings();
+         
+         // Try different user agents to avoid detection
+         $user_agents = array(
+             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+             'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+         );
+         
+         $current_user_agent = $user_agents[array_rand($user_agents)];
+         
+         $args = array(
+             'timeout' => $this->timeout,
+             'user-agent' => $current_user_agent,
+             'headers' => array(
+                 'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                 'Accept-Language' => 'en-US,en;q=0.9',
+                 'Accept-Encoding' => 'gzip, deflate, br',
+                 'Connection' => 'keep-alive',
+                 'Upgrade-Insecure-Requests' => '1',
+                 'Cache-Control' => 'no-cache',
+                 'Pragma' => 'no-cache',
+                 'Referer' => 'https://www.google.com/',
+                 'Sec-Fetch-Dest' => 'document',
+                 'Sec-Fetch-Mode' => 'navigate',
+                 'Sec-Fetch-Site' => 'same-origin',
+                 'Sec-Fetch-User' => '?1',
+                 'sec-ch-ua' => '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                 'sec-ch-ua-mobile' => '?0',
+                 'sec-ch-ua-platform' => '"Windows"',
+             ),
+             'sslverify' => false, // Some servers have SSL issues
+             'redirection' => 5,
+             'blocking' => true,
+             'cookies' => array(),
+         );
         
         // Add custom headers if configured
         if (!empty($settings['custom_headers'])) {
@@ -530,24 +547,46 @@ class Google_Maps_Reviews_Scraper {
      * @param string $html HTML response from Google Maps
      * @return array Array of parsed reviews
      */
-    private function parse_reviews_response($html) {
-        $reviews = array();
-        
-        // Validate HTML content before parsing
-        if (!$this->validate_html_content($html)) {
-            return $this->handle_parsing_error($html, 'HTML validation failed');
-        }
-        
-        try {
-            // Use DOMDocument for parsing
-            $dom = new DOMDocument();
-            libxml_use_internal_errors(true); // Suppress XML parsing warnings
-            $dom->loadHTML($html);
-            libxml_clear_errors();
-            
-            $xpath = new DOMXPath($dom);
-            
-                         // Try multiple selectors for review containers - updated for current Google Maps structure (2024)
+         private function parse_reviews_response($html) {
+         $reviews = array();
+         
+         // Enhanced debugging - log HTML content analysis
+         $this->log_error('debug_html_analysis', 'Starting HTML analysis', array(
+             'html_length' => strlen($html),
+             'html_preview' => substr($html, 0, 1000),
+             'contains_jftiEf' => strpos($html, 'jftiEf') !== false,
+             'contains_fontBodyMedium' => strpos($html, 'fontBodyMedium') !== false,
+             'contains_data_review_id' => strpos($html, 'data-review-id') !== false,
+             'contains_review' => strpos(strtolower($html), 'review') !== false,
+             'contains_rating' => strpos(strtolower($html), 'rating') !== false,
+             'contains_star' => strpos(strtolower($html), 'star') !== false,
+         ));
+         
+         // Validate HTML content before parsing
+         if (!$this->validate_html_content($html)) {
+             return $this->handle_parsing_error($html, 'HTML validation failed');
+         }
+         
+         try {
+             // Use DOMDocument for parsing
+             $dom = new DOMDocument();
+             libxml_use_internal_errors(true); // Suppress XML parsing warnings
+             $dom->loadHTML($html);
+             libxml_clear_errors();
+             
+             $xpath = new DOMXPath($dom);
+             
+             // Enhanced debugging - count all divs and analyze structure
+             $all_divs = $xpath->query('//div');
+             $this->log_error('debug_div_analysis', 'Div analysis', array(
+                 'total_divs' => $all_divs->length,
+                 'divs_with_jftiEf' => $xpath->query('//div[contains(@class, "jftiEf")]')->length,
+                 'divs_with_fontBodyMedium' => $xpath->query('//div[contains(@class, "fontBodyMedium")]')->length,
+                 'divs_with_data_review_id' => $xpath->query('//div[@data-review-id]')->length,
+                 'divs_with_review_class' => $xpath->query('//div[contains(@class, "review")]')->length,
+             ));
+             
+             // Try multiple selectors for review containers - updated for current Google Maps structure (2024)
              $review_selectors = array(
                  // Primary selector based on current Google Maps structure
                  '//div[contains(@class, "jftiEf") and contains(@class, "fontBodyMedium")]',
@@ -1656,8 +1695,27 @@ class Google_Maps_Reviews_Scraper {
                  }
              }
              
-             // Approach 2: Search and find business
-             $this->log_error('debug_info', 'Direct approach failed, trying search approach', array());
+             // Approach 2: Try different URL patterns
+             $alternative_urls = array(
+                 'https://www.google.com/maps/place/' . urlencode($business_name) . '/reviews',
+                 'https://www.google.com/maps/place/' . urlencode($business_name) . '/@0,0,15z/data=!4m8!14m7!1m6!2m5!1s!2m1!1s!3m1!1s2!4e1!5m1!1e1!6m1!1e2!7i16384!8i8192',
+                 'https://www.google.com/maps/place/' . urlencode($business_name) . '/@0,0,15z/data=!4m8!14m7!1m6!2m5!1s!2m1!1s!3m1!1s2!4e1!5m1!1e1!6m1!1e2!7i16384!8i8192!9m1!1e1',
+             );
+             
+             foreach ($alternative_urls as $alt_url) {
+                 $this->log_error('debug_info', 'Trying alternative URL: ' . $alt_url, array());
+                 $html = $this->fetch_url($alt_url);
+                 if ($html) {
+                     $reviews = $this->parse_reviews_response($html);
+                     if (!empty($reviews)) {
+                         $this->log_error('debug_info', 'Successfully found ' . count($reviews) . ' reviews using alternative URL', array());
+                         return $reviews;
+                     }
+                 }
+             }
+             
+             // Approach 3: Search and find business
+             $this->log_error('debug_info', 'Direct approaches failed, trying search approach', array());
              $search_url = 'https://www.google.com/maps/search/' . urlencode($business_name);
              
              // Fetch the search results page
@@ -1679,7 +1737,24 @@ class Google_Maps_Reviews_Scraper {
              }
              
              // Now fetch reviews from the found business URL
-             return $this->fetch_reviews_from_business_page($business_url, $options);
+             $reviews = $this->fetch_reviews_from_business_page($business_url, $options);
+             if (!is_wp_error($reviews) && !empty($reviews)) {
+                 return $reviews;
+             }
+             
+             // Approach 4: Try OneFoundry library as final fallback
+             $this->log_error('debug_info', 'All built-in approaches failed, trying OneFoundry library', array());
+             $onefoundry_reviews = $this->try_onefoundry_library($business_name, $options);
+             if (!is_wp_error($onefoundry_reviews) && !empty($onefoundry_reviews)) {
+                 return $onefoundry_reviews;
+             }
+             
+             // If all approaches failed, return the last error or empty result
+             if (is_wp_error($reviews)) {
+                 return $reviews;
+             }
+             
+             return array(); // Return empty array if no reviews found
              
          } catch (Exception $e) {
              $this->log_error('business_name_fetch_error', $e->getMessage(), array(
@@ -1691,6 +1766,59 @@ class Google_Maps_Reviews_Scraper {
          }
      }
     
+    /**
+     * Try using OneFoundry library as fallback
+     *
+     * @param string $business_name Business name
+     * @param array $options Additional options
+     * @return array|WP_Error Array of reviews or WP_Error on failure
+     */
+     private function try_onefoundry_library($business_name, $options = array()) {
+         try {
+             // Check if OneFoundry library is available
+             if (!class_exists('OneFoundry\GoogleMapsScraper\GoogleMapsScraper')) {
+                 $this->log_error('debug_info', 'OneFoundry library not available, skipping fallback', array());
+                 return new WP_Error('library_not_available', 'OneFoundry library not available');
+             }
+             
+             $this->log_error('debug_info', 'Trying OneFoundry library as fallback', array());
+             
+             // Use OneFoundry library
+             $scraper = new \OneFoundry\GoogleMapsScraper\GoogleMapsScraper();
+             $results = $scraper->scrape($business_name);
+             
+             if (!empty($results['reviews'])) {
+                 $reviews = array();
+                 foreach ($results['reviews'] as $review) {
+                     $reviews[] = array(
+                         'id' => $review['id'] ?? '',
+                         'author_name' => $review['author_name'] ?? '',
+                         'author_image' => $review['author_image'] ?? '',
+                         'rating' => $review['rating'] ?? 0,
+                         'content' => $review['text'] ?? '',
+                         'date' => $review['date'] ?? '',
+                         'helpful_votes' => $review['helpful_votes'] ?? 0,
+                         'owner_response' => $review['owner_response'] ?? '',
+                         'language' => 'en',
+                     );
+                 }
+                 
+                 $this->log_error('debug_info', 'Successfully found ' . count($reviews) . ' reviews using OneFoundry library', array());
+                 return $reviews;
+             }
+             
+             return new WP_Error('no_reviews_found', 'No reviews found using OneFoundry library');
+             
+         } catch (Exception $e) {
+             $this->log_error('onefoundry_error', $e->getMessage(), array(
+                 'business_name' => $business_name,
+                 'options' => $options
+             ));
+             
+             return new WP_Error('onefoundry_error', $e->getMessage());
+         }
+     }
+
     /**
      * Extract the first business URL from search results
      *
