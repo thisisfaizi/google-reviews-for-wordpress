@@ -55,6 +55,7 @@ class Google_Maps_Reviews_Admin {
         add_action('wp_ajax_gmrw_test_connection', array($this, 'ajax_test_connection'));
         add_action('wp_ajax_gmrw_minify_assets', array($this, 'ajax_minify_assets'));
         add_action('wp_ajax_gmrw_get_performance_stats', array($this, 'ajax_get_performance_stats'));
+        add_action('wp_ajax_gmrw_debug_html', array($this, 'ajax_debug_html'));
     }
     
     /**
@@ -761,5 +762,39 @@ class Google_Maps_Reviews_Admin {
             <?php esc_html_e('Log errors and debugging information to WordPress error log.', GMRW_TEXT_DOMAIN); ?>
         </p>
         <?php
+    }
+    
+    /**
+     * AJAX handler for debugging HTML content
+     */
+    public function ajax_debug_html() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+            wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+        }
+        
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+        }
+        
+        $business_name = sanitize_text_field($_POST['business_name']);
+        if (empty($business_name)) {
+            wp_send_json_error(__('Business name is required', GMRW_TEXT_DOMAIN));
+        }
+        
+        try {
+            $scraper = new Google_Maps_Reviews_Scraper();
+            $debug_info = $scraper->debug_html_content($business_name);
+            
+            wp_send_json_success(array(
+                'message' => __('Debug information retrieved successfully.', GMRW_TEXT_DOMAIN),
+                'debug_info' => $debug_info,
+            ));
+            
+        } catch (Exception $e) {
+            Google_Maps_Reviews_Logger::error('Failed to debug HTML content: ' . $e->getMessage(), __METHOD__);
+            wp_send_json_error(__('Failed to debug HTML content: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+        }
     }
 }

@@ -547,22 +547,27 @@ class Google_Maps_Reviews_Scraper {
             
             $xpath = new DOMXPath($dom);
             
-            // Try multiple selectors for review containers
+            // Try multiple selectors for review containers - updated for current Google Maps structure
             $review_selectors = array(
-                // Primary selectors for review containers
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "g88MCb")]',
+                // Current Google Maps review selectors (2024)
+                '//div[contains(@class, "jftiEf")]',
+                '//div[contains(@class, "g88MCb")]',
                 '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "jftiEf")]',
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "review")]',
+                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "g88MCb")]',
                 
-                // Alternative selectors
-                '//div[contains(@class, "review")]',
+                // Alternative modern selectors
+                '//div[contains(@class, "review") and contains(@class, "jftiEf")]',
+                '//div[contains(@class, "review") and contains(@class, "g88MCb")]',
                 '//div[contains(@class, "review-item")]',
                 '//div[contains(@class, "review-container")]',
                 
                 // Generic review-like containers
-                '//div[contains(@class, "g88MCb")]',
-                '//div[contains(@class, "jftiEf")]',
+                '//div[contains(@class, "review")]',
                 '//div[contains(@class, "review-dialog")]//div[contains(@class, "review")]',
+                
+                // Fallback selectors for different Google Maps versions
+                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "review")]',
+                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "review-item")]',
             );
             
             $review_nodes = null;
@@ -574,13 +579,31 @@ class Google_Maps_Reviews_Scraper {
                 }
             }
             
-            if (!$review_nodes || $review_nodes->length === 0) {
-                $this->log_error('parsing_error', 'No review containers found in HTML', array(
-                    'html_length' => strlen($html),
-                    'selectors_tried' => $review_selectors
-                ));
-                return $reviews;
-            }
+                         if (!$review_nodes || $review_nodes->length === 0) {
+                 // Enhanced debugging - look for any review-related content
+                 $debug_info = array(
+                     'html_length' => strlen($html),
+                     'selectors_tried' => $review_selectors,
+                     'html_preview' => substr($html, 0, 2000), // First 2000 chars for debugging
+                     'contains_review_text' => strpos(strtolower($html), 'review') !== false,
+                     'contains_rating_text' => strpos(strtolower($html), 'rating') !== false,
+                     'contains_star_text' => strpos(strtolower($html), 'star') !== false,
+                 );
+                 
+                 // Try to find any div with review-related classes
+                 $all_divs = $xpath->query('//div[contains(@class, "review") or contains(@class, "rating") or contains(@class, "star")]');
+                 $debug_info['divs_with_review_classes'] = $all_divs->length;
+                 
+                 $this->log_error('parsing_error', 'No review containers found in HTML', $debug_info);
+                 
+                 // If we found some divs with review classes, try to parse them anyway
+                 if ($all_divs->length > 0) {
+                     $this->log_error('debug_info', 'Found ' . $all_divs->length . ' divs with review-related classes, attempting to parse', array());
+                     $review_nodes = $all_divs;
+                 } else {
+                     return $reviews;
+                 }
+             }
             
             $successful_parses = 0;
             $failed_parses = 0;
@@ -1456,68 +1479,125 @@ class Google_Maps_Reviews_Scraper {
         return true;
     }
     
-    /**
-     * Test if scraping is working
-     *
-     * @param string $business_url Test business URL
-     * @return array|WP_Error Test results
-     */
-    public function test_scraping($business_url) {
-        $results = array(
-            'success' => false,
-            'message' => '',
-            'business_info' => null,
-            'reviews_count' => 0,
-            'error' => null,
-            'debug_info' => array(),
-        );
-        
-        try {
-            // Test business info extraction
-            $business_info = $this->get_business_info($business_url);
-            if (is_wp_error($business_info)) {
-                throw new Exception($business_info->get_error_message());
-            }
-            
-            $results['business_info'] = $business_info;
-            
-            // Test reviews extraction
-            $reviews = $this->get_reviews($business_url, array('max_pages' => 1));
-            if (is_wp_error($reviews)) {
-                throw new Exception($reviews->get_error_message());
-            }
-            
-            $results['reviews_count'] = count($reviews);
-            $results['success'] = true;
-            $results['message'] = sprintf(
-                __('Successfully extracted %d reviews for %s', GMRW_TEXT_DOMAIN),
-                $results['reviews_count'],
-                $business_info['name']
-            );
-            
-            // Add debug information
-            $results['debug_info'] = array(
-                'place_id' => $this->extract_place_id($business_url),
-                'url_validation' => Google_Maps_Reviews_Config::validate_business_url($business_url),
-                'cache_status' => 'working',
-                'rate_limiting' => 'enabled',
-            );
-            
-        } catch (Exception $e) {
-            $results['error'] = $e->getMessage();
-            $results['message'] = __('Scraping test failed', GMRW_TEXT_DOMAIN);
-            
-            // Add debug information for failed tests
-            $results['debug_info'] = array(
-                'place_id' => $this->extract_place_id($business_url),
-                'url_validation' => Google_Maps_Reviews_Config::validate_business_url($business_url),
-                'error_type' => get_class($e),
-                'error_code' => method_exists($e, 'get_error_code') ? $e->get_error_code() : 'unknown',
-            );
-        }
-        
-        return $results;
-    }
+         /**
+      * Test if scraping is working
+      *
+      * @param string $business_url Test business URL
+      * @return array|WP_Error Test results
+      */
+     public function test_scraping($business_url) {
+         $results = array(
+             'success' => false,
+             'message' => '',
+             'business_info' => null,
+             'reviews_count' => 0,
+             'error' => null,
+             'debug_info' => array(),
+         );
+         
+         try {
+             // Test business info extraction
+             $business_info = $this->get_business_info($business_url);
+             if (is_wp_error($business_info)) {
+                 throw new Exception($business_info->get_error_message());
+             }
+             
+             $results['business_info'] = $business_info;
+             
+             // Test reviews extraction
+             $reviews = $this->get_reviews($business_url, array('max_pages' => 1));
+             if (is_wp_error($reviews)) {
+                 throw new Exception($reviews->get_error_message());
+             }
+             
+             $results['reviews_count'] = count($reviews);
+             $results['success'] = true;
+             $results['message'] = sprintf(
+                 __('Successfully extracted %d reviews for %s', GMRW_TEXT_DOMAIN),
+                 $results['reviews_count'],
+                 $business_info['name']
+             );
+             
+             // Add debug information
+             $results['debug_info'] = array(
+                 'place_id' => $this->extract_place_id($business_url),
+                 'url_validation' => Google_Maps_Reviews_Config::validate_business_url($business_url),
+                 'cache_status' => 'working',
+                 'rate_limiting' => 'enabled',
+             );
+             
+         } catch (Exception $e) {
+             $results['error'] = $e->getMessage();
+             $results['message'] = __('Scraping test failed', GMRW_TEXT_DOMAIN);
+             
+             // Add debug information for failed tests
+             $results['debug_info'] = array(
+                 'place_id' => $this->extract_place_id($business_url),
+                 'url_validation' => Google_Maps_Reviews_Config::validate_business_url($business_url),
+                 'error_type' => get_class($e),
+                 'error_code' => method_exists($e, 'get_error_code') ? $e->get_error_code() : 'unknown',
+             );
+         }
+         
+         return $results;
+     }
+     
+     /**
+      * Simple test method to debug HTML content
+      *
+      * @param string $business_name Business name to test
+      * @return array Debug information
+      */
+     public function debug_html_content($business_name) {
+         $debug_info = array(
+             'business_name' => $business_name,
+             'direct_url' => '',
+             'html_length' => 0,
+             'contains_review_text' => false,
+             'contains_rating_text' => false,
+             'div_count' => 0,
+             'review_div_count' => 0,
+         );
+         
+         try {
+             // Try direct business URL
+             $direct_url = 'https://www.google.com/maps/place/' . urlencode($business_name);
+             $debug_info['direct_url'] = $direct_url;
+             
+             $html = $this->fetch_url($direct_url);
+             if ($html) {
+                 $debug_info['html_length'] = strlen($html);
+                 $debug_info['contains_review_text'] = strpos(strtolower($html), 'review') !== false;
+                 $debug_info['contains_rating_text'] = strpos(strtolower($html), 'rating') !== false;
+                 
+                 // Parse HTML to count divs
+                 $dom = new DOMDocument();
+                 @$dom->loadHTML($html);
+                 $xpath = new DOMXPath($dom);
+                 
+                 $all_divs = $xpath->query('//div');
+                 $debug_info['div_count'] = $all_divs->length;
+                 
+                 $review_divs = $xpath->query('//div[contains(@class, "review") or contains(@class, "rating") or contains(@class, "star")]');
+                 $debug_info['review_div_count'] = $review_divs->length;
+                 
+                 // Add sample of review-related divs
+                 $debug_info['sample_divs'] = array();
+                 for ($i = 0; $i < min(5, $review_divs->length); $i++) {
+                     $div = $review_divs->item($i);
+                     $debug_info['sample_divs'][] = array(
+                         'class' => $div->getAttribute('class'),
+                         'text_preview' => substr(trim($div->textContent), 0, 100)
+                     );
+                 }
+             }
+             
+         } catch (Exception $e) {
+             $debug_info['error'] = $e->getMessage();
+         }
+         
+         return $debug_info;
+     }
     
     /**
      * Fetch reviews by business name instead of place ID
@@ -1526,41 +1606,60 @@ class Google_Maps_Reviews_Scraper {
      * @param array $options Additional options
      * @return array|WP_Error Array of reviews or WP_Error on failure
      */
-    private function fetch_reviews_by_business_name($business_name, $options = array()) {
-        try {
-            // Construct search URL
-            $search_url = 'https://www.google.com/maps/search/' . urlencode($business_name);
-            
-            // Fetch the search results page
-            $html = $this->fetch_url($search_url);
-            if (!$html) {
-                throw new Google_Maps_Reviews_Scraping_Exception(
-                    __('Failed to fetch search results page', GMRW_TEXT_DOMAIN),
-                    'FETCH_FAILED'
-                );
-            }
-            
-            // Extract the first business URL from search results
-            $business_url = $this->extract_first_business_url($html, $business_name);
-            if (!$business_url) {
-                throw new Google_Maps_Reviews_Scraping_Exception(
-                    __('Could not find business in search results', GMRW_TEXT_DOMAIN),
-                    'BUSINESS_NOT_FOUND'
-                );
-            }
-            
-            // Now fetch reviews from the found business URL
-            return $this->fetch_reviews_from_business_page($business_url, $options);
-            
-        } catch (Exception $e) {
-            $this->log_error('business_name_fetch_error', $e->getMessage(), array(
-                'business_name' => $business_name,
-                'options' => $options
-            ));
-            
-            return new WP_Error('business_name_fetch_error', $e->getMessage());
-        }
-    }
+              private function fetch_reviews_by_business_name($business_name, $options = array()) {
+         try {
+             // Try multiple approaches to get reviews
+             
+             // Approach 1: Direct business URL with reviews parameter
+             $direct_url = 'https://www.google.com/maps/place/' . urlencode($business_name) . '/@0,0,15z/data=!4m8!14m7!1m6!2m5!1s!2m1!1s!3m1!1s2!4e1!5m1!1e1!6m1!1e2';
+             
+             $this->log_error('debug_info', 'Trying direct URL approach: ' . $direct_url, array());
+             
+             // Fetch the direct business page
+             $html = $this->fetch_url($direct_url);
+             if ($html) {
+                 // Try to parse reviews directly from this page
+                 $reviews = $this->parse_reviews_response($html);
+                 if (!empty($reviews)) {
+                     $this->log_error('debug_info', 'Successfully found ' . count($reviews) . ' reviews using direct URL approach', array());
+                     return $reviews;
+                 }
+             }
+             
+             // Approach 2: Search and find business
+             $this->log_error('debug_info', 'Direct approach failed, trying search approach', array());
+             $search_url = 'https://www.google.com/maps/search/' . urlencode($business_name);
+             
+             // Fetch the search results page
+             $html = $this->fetch_url($search_url);
+             if (!$html) {
+                 throw new Google_Maps_Reviews_Scraping_Exception(
+                     __('Failed to fetch search results page', GMRW_TEXT_DOMAIN),
+                     'FETCH_FAILED'
+                 );
+             }
+             
+             // Extract the first business URL from search results
+             $business_url = $this->extract_first_business_url($html, $business_name);
+             if (!$business_url) {
+                 throw new Google_Maps_Reviews_Scraping_Exception(
+                     __('Could not find business in search results', GMRW_TEXT_DOMAIN),
+                     'BUSINESS_NOT_FOUND'
+                 );
+             }
+             
+             // Now fetch reviews from the found business URL
+             return $this->fetch_reviews_from_business_page($business_url, $options);
+             
+         } catch (Exception $e) {
+             $this->log_error('business_name_fetch_error', $e->getMessage(), array(
+                 'business_name' => $business_name,
+                 'options' => $options
+             ));
+             
+             return new WP_Error('business_name_fetch_error', $e->getMessage());
+         }
+     }
     
     /**
      * Extract the first business URL from search results
@@ -1612,7 +1711,23 @@ class Google_Maps_Reviews_Scraper {
             );
         }
         
-        // Parse reviews from the HTML
-        return $this->parse_reviews_from_html($html, $options);
-    }
-}
+                 // Parse reviews from the HTML
+         return $this->parse_reviews_response($html);
+     }
+     
+     /**
+      * Fetch URL content
+      *
+      * @param string $url URL to fetch
+      * @return string|false HTML content or false on failure
+      */
+     private function fetch_url($url) {
+         $response = $this->make_request($url);
+         
+         if (is_wp_error($response)) {
+             return false;
+         }
+         
+         return wp_remote_retrieve_body($response);
+     }
+ }
