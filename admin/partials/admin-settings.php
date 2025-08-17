@@ -85,6 +85,16 @@ if (!defined('ABSPATH')) {
             </div>
             
             <div class="gmrw-admin-widget">
+                <h3><?php esc_html_e('Panther Browser Automation Status', GMRW_TEXT_DOMAIN); ?></h3>
+                <div id="panther-status">
+                    <p><?php esc_html_e('Checking Panther status...', GMRW_TEXT_DOMAIN); ?></p>
+                </div>
+                <button type="button" class="button button-secondary" id="check-panther-status">
+                    <?php esc_html_e('Check Panther Status', GMRW_TEXT_DOMAIN); ?>
+                </button>
+            </div>
+            
+            <div class="gmrw-admin-widget">
                 <h3><?php esc_html_e('Plugin Information', GMRW_TEXT_DOMAIN); ?></h3>
                 <ul>
                     <li><strong><?php esc_html_e('Version:', GMRW_TEXT_DOMAIN); ?></strong> <?php echo esc_html(GMRW_VERSION); ?></li>

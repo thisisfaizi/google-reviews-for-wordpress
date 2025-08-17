@@ -47,6 +47,12 @@
             
             // Auto-save functionality
             this.setupAutoSave();
+            
+            // Panther status check
+            $('#check-panther-status').on('click', this.checkPantherStatus);
+            
+            // Check Panther status on page load
+            this.checkPantherStatus();
         },
         
         /**
@@ -209,6 +215,66 @@
                 autoSaveTimer = setTimeout(function() {
                     GMRWAdmin.autoSaveSettings($form);
                 }, 2000); // Auto-save after 2 seconds of inactivity
+            });
+        },
+        
+        /**
+         * Check Panther browser automation status
+         */
+        checkPantherStatus: function() {
+            var $statusContainer = $('#panther-status');
+            var $button = $('#check-panther-status');
+            
+            $statusContainer.html('<p>Checking Panther status...</p>');
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'gmrw_check_panther_status',
+                    nonce: gmrwAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        var status = response.data;
+                        var statusHtml = '<ul>';
+                        
+                        if (status.panther_available) {
+                            statusHtml += '<li><span class="status-ok">✓</span> Symfony Panther library available</li>';
+                        } else {
+                            statusHtml += '<li><span class="status-error">✗</span> Symfony Panther library not available</li>';
+                        }
+                        
+                        if (status.client_initialized) {
+                            statusHtml += '<li><span class="status-ok">✓</span> Panther client initialized</li>';
+                        } else {
+                            statusHtml += '<li><span class="status-error">✗</span> Panther client not initialized</li>';
+                        }
+                        
+                        if (status.chrome_driver_available) {
+                            statusHtml += '<li><span class="status-ok">✓</span> Chrome driver available</li>';
+                        } else {
+                            statusHtml += '<li><span class="status-error">✗</span> Chrome driver not available</li>';
+                        }
+                        
+                        if (status.error) {
+                            statusHtml += '<li><span class="status-error">✗</span> Error: ' + status.error + '</li>';
+                        }
+                        
+                        statusHtml += '</ul>';
+                        
+                        $statusContainer.html(statusHtml);
+                    } else {
+                        $statusContainer.html('<p class="error">Error checking Panther status: ' + response.data + '</p>');
+                    }
+                },
+                error: function() {
+                    $statusContainer.html('<p class="error">Failed to check Panther status</p>');
+                },
+                complete: function() {
+                    $button.prop('disabled', false);
+                }
             });
         },
         

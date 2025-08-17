@@ -59,6 +59,7 @@ class Google_Maps_Reviews_Admin {
         add_action('wp_ajax_gmrw_create_tables', array($this, 'ajax_create_tables'));
         add_action('wp_ajax_gmrw_get_logs', array($this, 'ajax_get_logs'));
         add_action('wp_ajax_gmrw_clear_logs', array($this, 'ajax_clear_logs'));
+        add_action('wp_ajax_gmrw_check_panther_status', array($this, 'ajax_check_panther_status'));
     }
     
     /**
@@ -222,15 +223,6 @@ class Google_Maps_Reviews_Admin {
             GMRW_PLUGIN_SLUG,
             'advanced_settings'
         );
-        
-        // OneFoundry API Key field
-        add_settings_field(
-            'outscraper_api_key',
-            __('OneFoundry API Key', GMRW_TEXT_DOMAIN),
-            array($this, 'render_outscraper_api_key_field'),
-            GMRW_PLUGIN_SLUG,
-            'advanced_settings'
-        );
     }
     
     /**
@@ -387,11 +379,6 @@ class Google_Maps_Reviews_Admin {
         
         // Logging
         $sanitized['enable_logging'] = isset($input['enable_logging']);
-        
-        // OneFoundry API Key
-        if (isset($input['outscraper_api_key'])) {
-            $sanitized['outscraper_api_key'] = sanitize_text_field(trim($input['outscraper_api_key']));
-        }
         
         return $sanitized;
     }
@@ -793,23 +780,6 @@ class Google_Maps_Reviews_Admin {
         <?php
     }
     
-    public function render_outscraper_api_key_field() {
-        $settings = Google_Maps_Reviews_Config::get_settings();
-        $api_key = $settings['outscraper_api_key'] ?? '';
-        ?>
-        <input type="text" 
-               id="outscraper_api_key" 
-               name="<?php echo GMRW_OPTION_SETTINGS; ?>[outscraper_api_key]" 
-               value="<?php echo esc_attr($api_key); ?>" 
-               class="regular-text"
-               placeholder="<?php esc_attr_e('Enter your OneFoundry API key', GMRW_TEXT_DOMAIN); ?>">
-        <p class="description">
-            <?php esc_html_e('Optional: Enter your OneFoundry API key for enhanced review scraping capabilities. Get your API key from ', GMRW_TEXT_DOMAIN); ?>
-            <a href="https://onefoundry.com" target="_blank">onefoundry.com</a>
-        </p>
-        <?php
-    }
-    
          /**
       * AJAX handler for debugging HTML content
       */
@@ -1160,6 +1130,31 @@ class Google_Maps_Reviews_Admin {
              
          } catch (Exception $e) {
              wp_send_json_error(__('Error clearing logs: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+         }
+     }
+     
+     /**
+      * AJAX handler for checking Panther status
+      */
+     public function ajax_check_panther_status() {
+         // Verify nonce
+         if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+             wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+         }
+         
+         // Check user capabilities
+         if (!current_user_can('manage_options')) {
+             wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+         }
+         
+         try {
+             $scraper = new Google_Maps_Reviews_Scraper();
+             $status = $scraper->get_panther_status();
+             
+             wp_send_json_success($status);
+             
+         } catch (Exception $e) {
+             wp_send_json_error(__('Error checking Panther status: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
          }
      }
  }

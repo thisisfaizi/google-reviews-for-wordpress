@@ -67,6 +67,7 @@ class Google_Maps_Reviews_Autoloader {
             'Google_Maps_Reviews_Config' => 'includes/class-google-maps-reviews-config.php',
             'Google_Maps_Reviews_Init' => 'includes/class-google-maps-reviews-init.php',
             'Google_Maps_Reviews_Scraper' => 'includes/class-google-maps-reviews-scraper.php',
+            'Google_Maps_Reviews_Panther_Scraper' => 'includes/class-google-maps-reviews-panther-scraper.php',
             'Google_Maps_Reviews_Widget' => 'includes/class-google-maps-reviews-widget.php',
             'Google_Maps_Reviews_Shortcode' => 'includes/class-google-maps-reviews-shortcode.php',
             'Google_Maps_Reviews_Cache' => 'includes/class-google-maps-reviews-cache.php',

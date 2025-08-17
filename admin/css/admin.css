@@ -531,3 +531,33 @@
     margin: 0 10px;
     color: #666;
 }
+
+/* ==========================================================================
+   Panther Status Styles
+   ========================================================================== */
+
+.status-ok {
+    color: #46b450;
+    font-weight: bold;
+}
+
+.status-error {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+#panther-status ul {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+#panther-status li {
+    margin: 5px 0;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#panther-status li:last-child {
+    border-bottom: none;
+}
