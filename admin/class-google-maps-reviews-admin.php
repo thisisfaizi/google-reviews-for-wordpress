@@ -330,7 +330,10 @@ class Google_Maps_Reviews_Admin {
         
         // Business URL
         if (isset($input['business_url'])) {
-            $sanitized['business_url'] = esc_url_raw($input['business_url']);
+            $business_url = esc_url_raw($input['business_url']);
+            // Normalize the URL
+            $normalized_url = Google_Maps_Reviews_Config::normalize_business_url($business_url);
+            $sanitized['business_url'] = $normalized_url ?: $business_url;
         }
         
         // Cache duration

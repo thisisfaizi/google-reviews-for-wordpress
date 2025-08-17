@@ -275,11 +275,13 @@ class Google_Maps_Reviews_Config {
             return false;
         }
         
-        // Check if it's a Google Maps URL
+        // Check if it's a Google Maps URL with more flexible patterns
         $google_maps_patterns = array(
             '/maps\.google\./',
             '/google\.com\/maps/',
             '/goo\.gl\/maps/',
+            '/www\.google\.com\/maps\/place\//',
+            '/maps\.google\.com\/maps\/place\//',
         );
         
         foreach ($google_maps_patterns as $pattern) {
@@ -316,8 +318,6 @@ class Google_Maps_Reviews_Config {
         if ($place_id) {
             $parsed['place_id'] = $place_id;
             $parsed['is_valid'] = true;
-        } else {
-            $parsed['errors'][] = __('Could not extract place ID from URL', GMRW_TEXT_DOMAIN);
         }
         
         // Determine URL type
@@ -325,6 +325,11 @@ class Google_Maps_Reviews_Config {
         
         // Extract business name if possible
         $parsed['business_name'] = self::extract_business_name_from_url($url);
+        
+        // Consider URL valid if it's a Google Maps URL, even without place ID
+        if (self::validate_business_url($url)) {
+            $parsed['is_valid'] = true;
+        }
         
         return $parsed;
     }
@@ -409,6 +414,14 @@ class Google_Maps_Reviews_Config {
             '/maps\.google\.com\/maps\/place\/([^\/]+)\/[^\/\?]+/',
             // google.com/maps/place/Business+Name/place_id
             '/google\.com\/maps\/place\/([^\/]+)\/[^\/\?]+/',
+            // www.google.com/maps/place/Business+Name/place_id
+            '/www\.google\.com\/maps\/place\/([^\/]+)\/[^\/\?]+/',
+            // maps.google.com/maps/place/Business+Name/
+            '/maps\.google\.com\/maps\/place\/([^\/]+)\/?$/',
+            // google.com/maps/place/Business+Name/
+            '/google\.com\/maps\/place\/([^\/]+)\/?$/',
+            // www.google.com/maps/place/Business+Name/
+            '/www\.google\.com\/maps\/place\/([^\/]+)\/?$/',
         );
         
         foreach ($patterns as $pattern) {
@@ -461,8 +474,17 @@ class Google_Maps_Reviews_Config {
             return false;
         }
         
-        // Return a standardized URL format
-        return 'https://www.google.com/maps/place/' . $parsed['place_id'];
+        // If we have a place ID, return standardized format
+        if (!empty($parsed['place_id'])) {
+            return 'https://www.google.com/maps/place/' . $parsed['place_id'];
+        }
+        
+        // If no place ID but valid Google Maps URL, return as is
+        if (self::validate_business_url($url)) {
+            return $url;
+        }
+        
+        return false;
     }
     
     /**
