@@ -65,12 +65,15 @@ class Google_Maps_Reviews_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        $this->settings_page_hook = add_options_page(
+        // Add top-level menu
+        add_menu_page(
             __('Google Maps Reviews', GMRW_TEXT_DOMAIN),
             __('Google Maps Reviews', GMRW_TEXT_DOMAIN),
             'manage_options',
             GMRW_PLUGIN_SLUG,
-            array($this, 'render_settings_page')
+            array($this, 'render_settings_page'),
+            'dashicons-location',
+            30
         );
         
         // Add submenu pages
