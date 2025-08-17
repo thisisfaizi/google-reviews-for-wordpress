@@ -503,10 +503,9 @@ class Google_Maps_Reviews_Config {
             return $errors;
         }
         
+        // Only check for place ID if we can extract one, but don't require it
         $place_id = self::extract_place_id_from_url($url);
-        if (!$place_id) {
-            $errors[] = __('Could not extract place ID from URL', GMRW_TEXT_DOMAIN);
-        } elseif (!self::is_valid_place_id($place_id)) {
+        if ($place_id && !self::is_valid_place_id($place_id)) {
             $errors[] = __('Invalid place ID format', GMRW_TEXT_DOMAIN);
         }
         

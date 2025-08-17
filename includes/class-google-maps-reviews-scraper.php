@@ -90,15 +90,21 @@ class Google_Maps_Reviews_Scraper {
                 
                 // Parse business URL to get place ID
                 $place_id = $this->extract_place_id($business_url);
-                if (!$place_id) {
-                    throw new Google_Maps_Reviews_Scraping_Exception(
-                        __('Could not extract place ID from URL', GMRW_TEXT_DOMAIN),
-                        'PLACE_ID_EXTRACTION_FAILED'
-                    );
-                }
                 
-                // Fetch reviews from Google Maps
-                $reviews = $this->fetch_reviews($place_id, $options);
+                if ($place_id) {
+                    // Use place ID method if available
+                    $reviews = $this->fetch_reviews($place_id, $options);
+                } else {
+                    // Use business name method if no place ID
+                    $business_name = Google_Maps_Reviews_Config::extract_business_name_from_url($business_url);
+                    if (!$business_name) {
+                        throw new Google_Maps_Reviews_Scraping_Exception(
+                            __('Could not extract business name from URL', GMRW_TEXT_DOMAIN),
+                            'BUSINESS_NAME_EXTRACTION_FAILED'
+                        );
+                    }
+                    $reviews = $this->fetch_reviews_by_business_name($business_name, $options);
+                }
                 
                 // Cache the results
                 if (!empty($reviews)) {
@@ -1511,5 +1517,102 @@ class Google_Maps_Reviews_Scraper {
         }
         
         return $results;
+    }
+    
+    /**
+     * Fetch reviews by business name instead of place ID
+     *
+     * @param string $business_name Business name
+     * @param array $options Additional options
+     * @return array|WP_Error Array of reviews or WP_Error on failure
+     */
+    private function fetch_reviews_by_business_name($business_name, $options = array()) {
+        try {
+            // Construct search URL
+            $search_url = 'https://www.google.com/maps/search/' . urlencode($business_name);
+            
+            // Fetch the search results page
+            $html = $this->fetch_url($search_url);
+            if (!$html) {
+                throw new Google_Maps_Reviews_Scraping_Exception(
+                    __('Failed to fetch search results page', GMRW_TEXT_DOMAIN),
+                    'FETCH_FAILED'
+                );
+            }
+            
+            // Extract the first business URL from search results
+            $business_url = $this->extract_first_business_url($html, $business_name);
+            if (!$business_url) {
+                throw new Google_Maps_Reviews_Scraping_Exception(
+                    __('Could not find business in search results', GMRW_TEXT_DOMAIN),
+                    'BUSINESS_NOT_FOUND'
+                );
+            }
+            
+            // Now fetch reviews from the found business URL
+            return $this->fetch_reviews_from_business_page($business_url, $options);
+            
+        } catch (Exception $e) {
+            $this->log_error('business_name_fetch_error', $e->getMessage(), array(
+                'business_name' => $business_name,
+                'options' => $options
+            ));
+            
+            return new WP_Error('business_name_fetch_error', $e->getMessage());
+        }
+    }
+    
+    /**
+     * Extract the first business URL from search results
+     *
+     * @param string $html Search results HTML
+     * @param string $business_name Business name to match
+     * @return string|false Business URL or false on failure
+     */
+    private function extract_first_business_url($html, $business_name) {
+        // Use DOMDocument to parse the HTML
+        $dom = new DOMDocument();
+        @$dom->loadHTML($html);
+        $xpath = new DOMXPath($dom);
+        
+        // Look for business links in search results
+        $business_links = $xpath->query('//a[contains(@href, "/maps/place/")]');
+        
+        foreach ($business_links as $link) {
+            $href = $link->getAttribute('href');
+            $text = trim($link->textContent);
+            
+            // Check if this link matches our business name
+            if (stripos($text, $business_name) !== false || 
+                stripos($href, urlencode($business_name)) !== false) {
+                return 'https://www.google.com' . $href;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Fetch reviews from a business page URL
+     *
+     * @param string $business_url Business page URL
+     * @param array $options Additional options
+     * @return array|WP_Error Array of reviews or WP_Error on failure
+     */
+    private function fetch_reviews_from_business_page($business_url, $options = array()) {
+        // Add reviews parameter to URL
+        $reviews_url = $business_url . '?hl=en#lrd=0x0:0x0,0';
+        
+        // Fetch the reviews page
+        $html = $this->fetch_url($reviews_url);
+        if (!$html) {
+            throw new Google_Maps_Reviews_Scraping_Exception(
+                __('Failed to fetch reviews page', GMRW_TEXT_DOMAIN),
+                'FETCH_FAILED'
+            );
+        }
+        
+        // Parse reviews from the HTML
+        return $this->parse_reviews_from_html($html, $options);
     }
 }
