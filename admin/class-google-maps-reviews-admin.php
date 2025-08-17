@@ -876,6 +876,9 @@ class Google_Maps_Reviews_Admin {
                  <div class="gmrw-logs-header">
                      <h2><?php _e('Error Logs', GMRW_TEXT_DOMAIN); ?></h2>
                      <div class="gmrw-logs-actions">
+                         <button type="button" class="button button-primary" id="gmrw-create-tables">
+                             <?php _e('Create Tables', GMRW_TEXT_DOMAIN); ?>
+                         </button>
                          <button type="button" class="button button-secondary" id="gmrw-refresh-logs">
                              <?php _e('Refresh Logs', GMRW_TEXT_DOMAIN); ?>
                          </button>
@@ -897,6 +900,11 @@ class Google_Maps_Reviews_Admin {
          jQuery(document).ready(function($) {
              // Load logs on page load
              loadLogs();
+             
+             // Create tables button
+             $('#gmrw-create-tables').on('click', function() {
+                 createTables();
+             });
              
              // Refresh logs button
              $('#gmrw-refresh-logs').on('click', function() {
@@ -927,6 +935,28 @@ class Google_Maps_Reviews_Admin {
                      },
                      error: function() {
                          $('#gmrw-logs-table-container').html('<p class="error"><?php _e('Failed to load logs', GMRW_TEXT_DOMAIN); ?></p>');
+                     }
+                 });
+             }
+             
+             function createTables() {
+                 $.ajax({
+                     url: ajaxurl,
+                     type: 'POST',
+                     data: {
+                         action: 'gmrw_create_tables',
+                         nonce: '<?php echo wp_create_nonce(GMRW_NONCE_ACTION); ?>'
+                     },
+                     success: function(response) {
+                         if (response.success) {
+                             alert('<?php _e('Tables created successfully!', GMRW_TEXT_DOMAIN); ?>');
+                             loadLogs();
+                         } else {
+                             alert('<?php _e('Failed to create tables: ', GMRW_TEXT_DOMAIN); ?>' + response.data);
+                         }
+                     },
+                     error: function() {
+                         alert('<?php _e('Failed to create tables', GMRW_TEXT_DOMAIN); ?>');
                      }
                  });
              }
