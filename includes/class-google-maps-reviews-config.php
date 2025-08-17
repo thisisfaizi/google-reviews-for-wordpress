@@ -275,19 +275,11 @@ class Google_Maps_Reviews_Config {
             return false;
         }
         
-        // Check if it's a Google Maps URL with more flexible patterns
-        $google_maps_patterns = array(
-            '/maps\.google\./',
-            '/google\.com\/maps/',
-            '/goo\.gl\/maps/',
-            '/www\.google\.com\/maps\/place\//',
-            '/maps\.google\.com\/maps\/place\//',
-        );
-        
-        foreach ($google_maps_patterns as $pattern) {
-            if (preg_match($pattern, $url)) {
-                return true;
-            }
+        // Check if it's a Google Maps URL - simpler approach
+        if (strpos($url, 'google.com/maps') !== false || 
+            strpos($url, 'maps.google.com') !== false || 
+            strpos($url, 'goo.gl/maps') !== false) {
+            return true;
         }
         
         return false;

@@ -385,9 +385,14 @@ class Google_Maps_Reviews_Admin {
             wp_send_json_error(__('Business URL is required', GMRW_TEXT_DOMAIN));
         }
         
+        // Debug: Log the URL being processed
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('GMRW Debug: Processing URL: ' . $business_url);
+        }
+        
         // Validate business URL
         if (!Google_Maps_Reviews_Config::validate_business_url($business_url)) {
-            wp_send_json_error(__('Invalid Google Maps business URL', GMRW_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid Google Maps business URL. Please check the URL format.', GMRW_TEXT_DOMAIN));
         }
         
         // Test scraping
