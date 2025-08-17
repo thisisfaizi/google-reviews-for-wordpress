@@ -57,6 +57,8 @@ class Google_Maps_Reviews_Admin {
         add_action('wp_ajax_gmrw_get_performance_stats', array($this, 'ajax_get_performance_stats'));
         add_action('wp_ajax_gmrw_debug_html', array($this, 'ajax_debug_html'));
         add_action('wp_ajax_gmrw_create_tables', array($this, 'ajax_create_tables'));
+        add_action('wp_ajax_gmrw_get_logs', array($this, 'ajax_get_logs'));
+        add_action('wp_ajax_gmrw_clear_logs', array($this, 'ajax_clear_logs'));
     }
     
     /**
@@ -79,6 +81,15 @@ class Google_Maps_Reviews_Admin {
             'manage_options',
             GMRW_PLUGIN_SLUG,
             array($this, 'render_settings_page')
+        );
+        
+        add_submenu_page(
+            GMRW_PLUGIN_SLUG,
+            __('Logs', GMRW_TEXT_DOMAIN),
+            __('Logs', GMRW_TEXT_DOMAIN),
+            'manage_options',
+            GMRW_PLUGIN_SLUG . '-logs',
+            array($this, 'render_logs_page')
         );
         
         add_submenu_page(
@@ -846,7 +857,245 @@ class Google_Maps_Reviews_Admin {
              }
              
          } catch (Exception $e) {
-             wp_send_json_error(__('Error creating tables: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+                          wp_send_json_error(__('Error creating tables: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
          }
      }
-}
+     
+     /**
+      * Render logs page
+      */
+     public function render_logs_page() {
+         ?>
+         <div class="wrap">
+             <h1><?php _e('Google Maps Reviews Widget - Logs', GMRW_TEXT_DOMAIN); ?></h1>
+             
+             <div class="gmrw-logs-container">
+                 <div class="gmrw-logs-header">
+                     <h2><?php _e('Error Logs', GMRW_TEXT_DOMAIN); ?></h2>
+                     <div class="gmrw-logs-actions">
+                         <button type="button" class="button button-secondary" id="gmrw-refresh-logs">
+                             <?php _e('Refresh Logs', GMRW_TEXT_DOMAIN); ?>
+                         </button>
+                         <button type="button" class="button button-secondary" id="gmrw-clear-logs">
+                             <?php _e('Clear All Logs', GMRW_TEXT_DOMAIN); ?>
+                         </button>
+                     </div>
+                 </div>
+                 
+                 <div class="gmrw-logs-content">
+                     <div id="gmrw-logs-table-container">
+                         <p><?php _e('Loading logs...', GMRW_TEXT_DOMAIN); ?></p>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+         <script>
+         jQuery(document).ready(function($) {
+             // Load logs on page load
+             loadLogs();
+             
+             // Refresh logs button
+             $('#gmrw-refresh-logs').on('click', function() {
+                 loadLogs();
+             });
+             
+             // Clear logs button
+             $('#gmrw-clear-logs').on('click', function() {
+                 if (confirm('<?php _e('Are you sure you want to clear all logs?', GMRW_TEXT_DOMAIN); ?>')) {
+                     clearLogs();
+                 }
+             });
+             
+             function loadLogs() {
+                 $.ajax({
+                     url: ajaxurl,
+                     type: 'POST',
+                     data: {
+                         action: 'gmrw_get_logs',
+                         nonce: '<?php echo wp_create_nonce(GMRW_NONCE_ACTION); ?>'
+                     },
+                     success: function(response) {
+                         if (response.success) {
+                             $('#gmrw-logs-table-container').html(response.data.html);
+                         } else {
+                             $('#gmrw-logs-table-container').html('<p class="error">' + response.data + '</p>');
+                         }
+                     },
+                     error: function() {
+                         $('#gmrw-logs-table-container').html('<p class="error"><?php _e('Failed to load logs', GMRW_TEXT_DOMAIN); ?></p>');
+                     }
+                 });
+             }
+             
+             function clearLogs() {
+                 $.ajax({
+                     url: ajaxurl,
+                     type: 'POST',
+                     data: {
+                         action: 'gmrw_clear_logs',
+                         nonce: '<?php echo wp_create_nonce(GMRW_NONCE_ACTION); ?>'
+                     },
+                     success: function(response) {
+                         if (response.success) {
+                             alert('<?php _e('Logs cleared successfully!', GMRW_TEXT_DOMAIN); ?>');
+                             loadLogs();
+                         } else {
+                             alert('<?php _e('Failed to clear logs: ', GMRW_TEXT_DOMAIN); ?>' + response.data);
+                         }
+                     },
+                     error: function() {
+                         alert('<?php _e('Failed to clear logs', GMRW_TEXT_DOMAIN); ?>');
+                     }
+                 });
+             }
+         });
+         </script>
+         <?php
+     }
+     
+     /**
+      * AJAX handler for getting logs
+      */
+     public function ajax_get_logs() {
+         // Verify nonce
+         if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+             wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+         }
+         
+         // Check user capabilities
+         if (!current_user_can('manage_options')) {
+             wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+         }
+         
+         try {
+             global $wpdb;
+             
+             $table_name = Google_Maps_Reviews_Config::get_logs_table();
+             
+             // Check if table exists
+             $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+             
+             if (!$table_exists) {
+                 wp_send_json_error(__('Logs table does not exist. Please deactivate and reactivate the plugin.', GMRW_TEXT_DOMAIN));
+             }
+             
+             // Get logs with pagination
+             $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
+             $per_page = 50;
+             $offset = ($page - 1) * $per_page;
+             
+             $logs = $wpdb->get_results(
+                 $wpdb->prepare(
+                     "SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT %d OFFSET %d",
+                     $per_page,
+                     $offset
+                 )
+             );
+             
+             $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+             
+             // Generate HTML table
+             $html = '<table class="wp-list-table widefat fixed striped">';
+             $html .= '<thead><tr>';
+             $html .= '<th>' . __('Timestamp', GMRW_TEXT_DOMAIN) . '</th>';
+             $html .= '<th>' . __('Level', GMRW_TEXT_DOMAIN) . '</th>';
+             $html .= '<th>' . __('Error Type', GMRW_TEXT_DOMAIN) . '</th>';
+             $html .= '<th>' . __('Message', GMRW_TEXT_DOMAIN) . '</th>';
+             $html .= '<th>' . __('Context', GMRW_TEXT_DOMAIN) . '</th>';
+             $html .= '</tr></thead>';
+             $html .= '<tbody>';
+             
+             if (empty($logs)) {
+                 $html .= '<tr><td colspan="5">' . __('No logs found', GMRW_TEXT_DOMAIN) . '</td></tr>';
+             } else {
+                 foreach ($logs as $log) {
+                     $context = !empty($log->context) ? json_decode($log->context, true) : array();
+                     $context_html = '';
+                     
+                     if (!empty($context)) {
+                         $context_html = '<details><summary>' . __('View Details', GMRW_TEXT_DOMAIN) . '</summary>';
+                         $context_html .= '<pre>' . esc_html(json_encode($context, JSON_PRETTY_PRINT)) . '</pre>';
+                         $context_html .= '</details>';
+                     }
+                     
+                     $html .= '<tr>';
+                     $html .= '<td>' . esc_html($log->timestamp) . '</td>';
+                     $html .= '<td><span class="log-level log-level-' . esc_attr($log->level) . '">' . esc_html($log->level) . '</span></td>';
+                     $html .= '<td>' . esc_html($log->error_type) . '</td>';
+                     $html .= '<td>' . esc_html($log->message) . '</td>';
+                     $html .= '<td>' . $context_html . '</td>';
+                     $html .= '</tr>';
+                 }
+             }
+             
+             $html .= '</tbody></table>';
+             
+             // Add pagination
+             $total_pages = ceil($total_logs / $per_page);
+             if ($total_pages > 1) {
+                 $html .= '<div class="tablenav-pages">';
+                 $html .= '<span class="displaying-num">' . sprintf(__('%d items', GMRW_TEXT_DOMAIN), $total_logs) . '</span>';
+                 
+                 if ($page > 1) {
+                     $html .= '<a class="prev-page" href="#" data-page="' . ($page - 1) . '">‹</a>';
+                 }
+                 
+                 $html .= '<span class="paging-input">';
+                 $html .= sprintf(__('%1$s of %2$s', GMRW_TEXT_DOMAIN), $page, $total_pages);
+                 $html .= '</span>';
+                 
+                 if ($page < $total_pages) {
+                     $html .= '<a class="next-page" href="#" data-page="' . ($page + 1) . '">›</a>';
+                 }
+                 
+                 $html .= '</div>';
+             }
+             
+             wp_send_json_success(array('html' => $html));
+             
+         } catch (Exception $e) {
+             wp_send_json_error(__('Error loading logs: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+         }
+     }
+     
+     /**
+      * AJAX handler for clearing logs
+      */
+     public function ajax_clear_logs() {
+         // Verify nonce
+         if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+             wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+         }
+         
+         // Check user capabilities
+         if (!current_user_can('manage_options')) {
+             wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+         }
+         
+         try {
+             global $wpdb;
+             
+             $table_name = Google_Maps_Reviews_Config::get_logs_table();
+             
+             // Check if table exists
+             $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+             
+             if (!$table_exists) {
+                 wp_send_json_error(__('Logs table does not exist', GMRW_TEXT_DOMAIN));
+             }
+             
+             // Clear all logs
+             $result = $wpdb->query("DELETE FROM $table_name");
+             
+             if ($result !== false) {
+                 wp_send_json_success(__('Logs cleared successfully', GMRW_TEXT_DOMAIN));
+             } else {
+                 wp_send_json_error(__('Failed to clear logs', GMRW_TEXT_DOMAIN));
+             }
+             
+         } catch (Exception $e) {
+             wp_send_json_error(__('Error clearing logs: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+         }
+     }
+ }

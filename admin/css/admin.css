@@ -401,3 +401,133 @@
         color: #f0f0f1;
     }
 }
+
+/* ==========================================================================
+   Logs Page Styles
+   ========================================================================== */
+
+.gmrw-logs-container {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.gmrw-logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.gmrw-logs-header h2 {
+    margin: 0;
+    color: #23282d;
+}
+
+.gmrw-logs-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.gmrw-logs-content {
+    padding: 20px;
+}
+
+.gmrw-logs-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gmrw-logs-content th {
+    background: #f9f9f9;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.gmrw-logs-content td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f1;
+    vertical-align: top;
+}
+
+.log-level {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.log-level-error {
+    background: #dc3232;
+    color: #fff;
+}
+
+.log-level-warning {
+    background: #ffb900;
+    color: #000;
+}
+
+.log-level-info {
+    background: #00a32a;
+    color: #fff;
+}
+
+.log-level-debug {
+    background: #72aee6;
+    color: #fff;
+}
+
+.gmrw-logs-content details {
+    margin: 0;
+}
+
+.gmrw-logs-content summary {
+    cursor: pointer;
+    color: #0073aa;
+    font-size: 12px;
+}
+
+.gmrw-logs-content summary:hover {
+    text-decoration: underline;
+}
+
+.gmrw-logs-content pre {
+    background: #f6f7f7;
+    padding: 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin: 5px 0 0 0;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tablenav-pages {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.tablenav-pages a {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 2px;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #0073aa;
+}
+
+.tablenav-pages a:hover {
+    background: #e5e5e5;
+}
+
+.tablenav-pages .paging-input {
+    margin: 0 10px;
+    color: #666;
+}
