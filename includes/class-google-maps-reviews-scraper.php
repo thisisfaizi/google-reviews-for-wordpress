@@ -577,17 +577,20 @@ class Google_Maps_Reviews_Scraper {
          private function parse_reviews_response($html) {
          $reviews = array();
          
-         // Enhanced debugging - log HTML content analysis
-         $this->log_error('debug_html_analysis', 'Starting HTML analysis', array(
-             'html_length' => strlen($html),
-             'html_preview' => substr($html, 0, 1000),
-             'contains_jftiEf' => strpos($html, 'jftiEf') !== false,
-             'contains_fontBodyMedium' => strpos($html, 'fontBodyMedium') !== false,
-             'contains_data_review_id' => strpos($html, 'data-review-id') !== false,
-             'contains_review' => strpos(strtolower($html), 'review') !== false,
-             'contains_rating' => strpos(strtolower($html), 'rating') !== false,
-             'contains_star' => strpos(strtolower($html), 'star') !== false,
-         ));
+                   // Enhanced debugging - log HTML content analysis
+          $this->log_error('debug_html_analysis', 'Starting HTML analysis', array(
+              'html_length' => strlen($html),
+              'html_preview' => substr($html, 0, 1000),
+              'contains_jftiEf' => strpos($html, 'jftiEf') !== false,
+              'contains_fontBodyMedium' => strpos($html, 'fontBodyMedium') !== false,
+              'contains_data_review_id' => strpos($html, 'data-review-id') !== false,
+              'contains_review' => strpos(strtolower($html), 'review') !== false,
+              'contains_rating' => strpos(strtolower($html), 'rating') !== false,
+              'contains_star' => strpos(strtolower($html), 'star') !== false,
+              'contains_robot' => strpos(strtolower($html), 'robot') !== false,
+              'contains_automated' => strpos(strtolower($html), 'automated') !== false,
+              'contains_error' => strpos(strtolower($html), 'error') !== false,
+          ));
          
          // Validate HTML content before parsing
          if (!$this->validate_html_content($html)) {
@@ -1578,10 +1581,10 @@ class Google_Maps_Reviews_Scraper {
              'forbidden',
              'blocked',
              'captcha',
-             'robot',
-             'automated',
              'security check',
              'unusual traffic',
+             'automated traffic',
+             'bot detection',
          );
          
          $html_lower = strtolower($html);
@@ -1596,6 +1599,22 @@ class Google_Maps_Reviews_Scraper {
          if (strpos($html_lower, 'sorry') !== false && strpos($html_lower, 'maps') !== false) {
              $this->log_error('validation_error', "HTML appears to be Google Maps error page");
              return false;
+         }
+         
+         // Check for specific error patterns that indicate blocking
+         $error_patterns = array(
+             '/our systems have detected unusual traffic/i',
+             '/please complete the security check/i',
+             '/verify you are human/i',
+             '/automated access detected/i',
+             '/blocked by security/i',
+         );
+         
+         foreach ($error_patterns as $pattern) {
+             if (preg_match($pattern, $html_lower)) {
+                 $this->log_error('validation_error', "HTML contains blocking pattern: {$pattern}");
+                 return false;
+             }
          }
         
         return true;
