@@ -162,40 +162,48 @@ class Google_Maps_Reviews_Scraper {
         return new WP_Error('max_retries_exceeded', __('Maximum retry attempts exceeded', GMRW_TEXT_DOMAIN));
     }
     
-    /**
-     * Extract place ID from Google Maps URL
-     *
-     * @param string $url Google Maps URL
-     * @return string|false Place ID or false on failure
-     */
-    private function extract_place_id($url) {
-        // Common patterns for Google Maps URLs
-        $patterns = array(
-            // maps.google.com/maps/place/...
-            '/maps\.google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
-            // maps.google.com/maps?cid=...
-            '/maps\.google\.com\/maps\?.*cid=([^&\s]+)/',
-            // maps.google.com/maps?q=place_id:...
-            '/maps\.google\.com\/maps\?.*q=place_id:([^&\s]+)/',
-            // goo.gl/maps/...
-            '/goo\.gl\/maps\/([^\/\?]+)/',
-            // google.com/maps/place/...
-            '/google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
-        );
-        
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $url, $matches)) {
-                return $matches[1];
-            }
-        }
-        
-        // Try to extract from any URL with place_id parameter
-        if (preg_match('/place_id=([^&\s]+)/', $url, $matches)) {
-            return $matches[1];
-        }
-        
-        return false;
-    }
+         /**
+      * Extract place ID from Google Maps URL
+      *
+      * @param string $url Google Maps URL
+      * @return string|false Place ID or false on failure
+      */
+     private function extract_place_id($url) {
+         // Common patterns for Google Maps URLs
+         $patterns = array(
+             // maps.google.com/maps/place/...
+             '/maps\.google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
+             // maps.google.com/maps?cid=...
+             '/maps\.google\.com\/maps\?.*cid=([^&\s]+)/',
+             // maps.google.com/maps?q=place_id:...
+             '/maps\.google\.com\/maps\?.*q=place_id:([^&\s]+)/',
+             // goo.gl/maps/...
+             '/goo\.gl\/maps\/([^\/\?]+)/',
+             // google.com/maps/place/...
+             '/google\.com\/maps\/place\/[^\/]+\/([^\/\?]+)/',
+         );
+         
+         foreach ($patterns as $pattern) {
+             if (preg_match($pattern, $url, $matches)) {
+                 $place_id = $matches[1];
+                 // Validate that it's not coordinates
+                 if (!preg_match('/^@[\d\.,-]+z$/', $place_id)) {
+                     return $place_id;
+                 }
+             }
+         }
+         
+         // Try to extract from any URL with place_id parameter
+         if (preg_match('/place_id=([^&\s]+)/', $url, $matches)) {
+             $place_id = $matches[1];
+             // Validate that it's not coordinates
+             if (!preg_match('/^@[\d\.,-]+z$/', $place_id)) {
+                 return $place_id;
+             }
+         }
+         
+         return false;
+     }
     
     /**
      * Fetch reviews from Google Maps
@@ -436,31 +444,38 @@ class Google_Maps_Reviews_Scraper {
          
          $current_user_agent = $user_agents[array_rand($user_agents)];
          
-         $args = array(
-             'timeout' => $this->timeout,
-             'user-agent' => $current_user_agent,
-             'headers' => array(
-                 'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                 'Accept-Language' => 'en-US,en;q=0.9',
-                 'Accept-Encoding' => 'gzip, deflate, br',
-                 'Connection' => 'keep-alive',
-                 'Upgrade-Insecure-Requests' => '1',
-                 'Cache-Control' => 'no-cache',
-                 'Pragma' => 'no-cache',
-                 'Referer' => 'https://www.google.com/',
-                 'Sec-Fetch-Dest' => 'document',
-                 'Sec-Fetch-Mode' => 'navigate',
-                 'Sec-Fetch-Site' => 'same-origin',
-                 'Sec-Fetch-User' => '?1',
-                 'sec-ch-ua' => '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-                 'sec-ch-ua-mobile' => '?0',
-                 'sec-ch-ua-platform' => '"Windows"',
-             ),
-             'sslverify' => false, // Some servers have SSL issues
-             'redirection' => 5,
-             'blocking' => true,
-             'cookies' => array(),
-         );
+                   $args = array(
+              'timeout' => $this->timeout,
+              'user-agent' => $current_user_agent,
+              'headers' => array(
+                  'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                  'Accept-Language' => 'en-US,en;q=0.9',
+                  'Accept-Encoding' => 'gzip, deflate, br',
+                  'Connection' => 'keep-alive',
+                  'Upgrade-Insecure-Requests' => '1',
+                  'Cache-Control' => 'max-age=0',
+                  'Sec-Fetch-Dest' => 'document',
+                  'Sec-Fetch-Mode' => 'navigate',
+                  'Sec-Fetch-Site' => 'same-origin',
+                  'Sec-Fetch-User' => '?1',
+                  'sec-ch-ua' => '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                  'sec-ch-ua-mobile' => '?0',
+                  'sec-ch-ua-platform' => '"Windows"',
+                  'sec-ch-ua-platform-version' => '"15.0.0"',
+                  'sec-ch-ua-model' => '""',
+                  'sec-ch-ua-bitness' => '"64"',
+                  'sec-ch-ua-full-version' => '"120.0.6099.109"',
+                  'sec-ch-ua-full-version-list' => '"Not_A Brand";v="8.0.0.0", "Chromium";v="120.0.6099.109", "Google Chrome";v="120.0.6099.109"',
+                  'sec-ch-ua-wow64' => '?0',
+                  'DNT' => '1',
+                  'Referer' => 'https://www.google.com/maps/',
+              ),
+              'sslverify' => false, // Some servers have SSL issues
+              'redirection' => 5,
+              'blocking' => true,
+              'cookies' => array(),
+              'httpversion' => '1.1',
+          );
         
         // Add custom headers if configured
         if (!empty($settings['custom_headers'])) {
@@ -496,19 +511,31 @@ class Google_Maps_Reviews_Scraper {
                     __('Access forbidden. The request may have been blocked.', GMRW_TEXT_DOMAIN),
                     array('status_code' => $response_code, 'url' => $url)
                 );
-            case 404:
-                // Not Found
-                return new WP_Error(
-                    'not_found',
-                    __('The requested resource was not found.', GMRW_TEXT_DOMAIN),
-                    array('status_code' => $response_code, 'url' => $url)
-                );
-            default:
-                return new WP_Error(
-                    'http_error',
-                    sprintf(__('HTTP request failed with status code %d', GMRW_TEXT_DOMAIN), $response_code),
-                    array('status_code' => $response_code, 'url' => $url)
-                );
+                         case 404:
+                 // Not Found
+                 return new WP_Error(
+                     'not_found',
+                     __('The requested resource was not found.', GMRW_TEXT_DOMAIN),
+                     array('status_code' => $response_code, 'url' => $url)
+                 );
+             case 500:
+                 // Internal Server Error - likely blocked
+                 $this->log_error('server_error', 'Google Maps returned 500 error - likely blocking requests', array(
+                     'url' => $url,
+                     'user_agent' => $current_user_agent,
+                     'response_code' => $response_code
+                 ));
+                 return new WP_Error(
+                     'server_error',
+                     __('Google Maps is blocking requests. This may be due to anti-bot protection.', GMRW_TEXT_DOMAIN),
+                     array('status_code' => $response_code, 'url' => $url)
+                 );
+             default:
+                 return new WP_Error(
+                     'http_error',
+                     sprintf(__('HTTP request failed with status code %d', GMRW_TEXT_DOMAIN), $response_code),
+                     array('status_code' => $response_code, 'url' => $url)
+                 );
         }
         
         return $response;
