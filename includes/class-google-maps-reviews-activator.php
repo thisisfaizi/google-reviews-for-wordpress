@@ -125,17 +125,18 @@ class Google_Maps_Reviews_Activator {
         ) $charset_collate;";
 
         // Error log table
-        $error_table = $wpdb->prefix . 'gmrw_error_log';
+        $error_table = $wpdb->prefix . 'gmrw_logs';
         $error_sql = "CREATE TABLE $error_table (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            error_type varchar(50) NOT NULL,
-            error_message text NOT NULL,
-            business_url varchar(500),
-            stack_trace longtext,
-            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+            timestamp datetime DEFAULT CURRENT_TIMESTAMP,
+            level varchar(20) NOT NULL DEFAULT 'error',
+            message text NOT NULL,
+            context longtext,
+            error_type varchar(50),
             PRIMARY KEY (id),
-            KEY error_type (error_type),
-            KEY created_at (created_at)
+            KEY timestamp (timestamp),
+            KEY level (level),
+            KEY error_type (error_type)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

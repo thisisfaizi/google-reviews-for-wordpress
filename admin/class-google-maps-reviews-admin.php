@@ -56,6 +56,7 @@ class Google_Maps_Reviews_Admin {
         add_action('wp_ajax_gmrw_minify_assets', array($this, 'ajax_minify_assets'));
         add_action('wp_ajax_gmrw_get_performance_stats', array($this, 'ajax_get_performance_stats'));
         add_action('wp_ajax_gmrw_debug_html', array($this, 'ajax_debug_html'));
+        add_action('wp_ajax_gmrw_create_tables', array($this, 'ajax_create_tables'));
     }
     
     /**
@@ -764,37 +765,88 @@ class Google_Maps_Reviews_Admin {
         <?php
     }
     
-    /**
-     * AJAX handler for debugging HTML content
-     */
-    public function ajax_debug_html() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
-            wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
-        }
-        
-        // Check user capabilities
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
-        }
-        
-        $business_name = sanitize_text_field($_POST['business_name']);
-        if (empty($business_name)) {
-            wp_send_json_error(__('Business name is required', GMRW_TEXT_DOMAIN));
-        }
-        
-        try {
-            $scraper = new Google_Maps_Reviews_Scraper();
-            $debug_info = $scraper->debug_html_content($business_name);
-            
-            wp_send_json_success(array(
-                'message' => __('Debug information retrieved successfully.', GMRW_TEXT_DOMAIN),
-                'debug_info' => $debug_info,
-            ));
-            
-        } catch (Exception $e) {
-            Google_Maps_Reviews_Logger::error('Failed to debug HTML content: ' . $e->getMessage(), __METHOD__);
-            wp_send_json_error(__('Failed to debug HTML content: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
-        }
-    }
+         /**
+      * AJAX handler for debugging HTML content
+      */
+     public function ajax_debug_html() {
+         // Verify nonce
+         if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+             wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+         }
+         
+         // Check user capabilities
+         if (!current_user_can('manage_options')) {
+             wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+         }
+         
+         $business_name = sanitize_text_field($_POST['business_name']);
+         if (empty($business_name)) {
+             wp_send_json_error(__('Business name is required', GMRW_TEXT_DOMAIN));
+         }
+         
+         try {
+             $scraper = new Google_Maps_Reviews_Scraper();
+             $debug_info = $scraper->debug_html_content($business_name);
+             
+             wp_send_json_success(array(
+                 'message' => __('Debug information retrieved successfully.', GMRW_TEXT_DOMAIN),
+                 'debug_info' => $debug_info,
+             ));
+             
+         } catch (Exception $e) {
+             Google_Maps_Reviews_Logger::error('Failed to debug HTML content: ' . $e->getMessage(), __METHOD__);
+             wp_send_json_error(__('Failed to debug HTML content: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+         }
+     }
+     
+     /**
+      * AJAX handler for creating missing database tables
+      */
+     public function ajax_create_tables() {
+         // Verify nonce
+         if (!wp_verify_nonce($_POST['nonce'], GMRW_NONCE_ACTION)) {
+             wp_send_json_error(__('Security check failed', GMRW_TEXT_DOMAIN));
+         }
+         
+         // Check user capabilities
+         if (!current_user_can('manage_options')) {
+             wp_send_json_error(__('Insufficient permissions', GMRW_TEXT_DOMAIN));
+         }
+         
+         try {
+             global $wpdb;
+             
+             $charset_collate = $wpdb->get_charset_collate();
+             
+             // Create logs table
+             $table_name = $wpdb->prefix . 'gmrw_logs';
+             $sql = "CREATE TABLE $table_name (
+                 id bigint(20) NOT NULL AUTO_INCREMENT,
+                 timestamp datetime DEFAULT CURRENT_TIMESTAMP,
+                 level varchar(20) NOT NULL DEFAULT 'error',
+                 message text NOT NULL,
+                 context longtext,
+                 error_type varchar(50),
+                 PRIMARY KEY (id),
+                 KEY timestamp (timestamp),
+                 KEY level (level),
+                 KEY error_type (error_type)
+             ) $charset_collate;";
+             
+             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+             dbDelta($sql);
+             
+             // Check if table was created
+             $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+             
+             if ($table_exists) {
+                 wp_send_json_success(__('Database tables created successfully!', GMRW_TEXT_DOMAIN));
+             } else {
+                 wp_send_json_error(__('Failed to create database tables.', GMRW_TEXT_DOMAIN));
+             }
+             
+         } catch (Exception $e) {
+             wp_send_json_error(__('Error creating tables: ', GMRW_TEXT_DOMAIN) . $e->getMessage());
+         }
+     }
 }

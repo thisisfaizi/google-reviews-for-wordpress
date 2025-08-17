@@ -1468,28 +1468,46 @@ class Google_Maps_Reviews_Scraper {
         }
     }
     
-    /**
-     * Store error log in database
-     *
-     * @param array $log_entry Log entry to store
-     */
-    private function store_error_log($log_entry) {
-        global $wpdb;
-        
-        $table_name = Google_Maps_Reviews_Config::get_logs_table();
-        
-        $wpdb->insert(
-            $table_name,
-            array(
-                'timestamp' => $log_entry['timestamp'],
-                'level' => 'error',
-                'message' => $log_entry['message'],
-                'context' => json_encode($log_entry['context']),
-                'error_type' => $log_entry['error_type'],
-            ),
-            array('%s', '%s', '%s', '%s', '%s')
-        );
-    }
+         /**
+      * Store error log in database
+      *
+      * @param array $log_entry Log entry to store
+      */
+     private function store_error_log($log_entry) {
+         global $wpdb;
+         
+         $table_name = Google_Maps_Reviews_Config::get_logs_table();
+         
+         // Check if table exists before trying to insert
+         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+         
+         if (!$table_exists) {
+             // If table doesn't exist, just log to WordPress error log
+             if (defined('WP_DEBUG') && WP_DEBUG) {
+                 error_log("Google Maps Reviews Widget [{$log_entry['error_type']}]: {$log_entry['message']}");
+             }
+             return;
+         }
+         
+         try {
+             $wpdb->insert(
+                 $table_name,
+                 array(
+                     'timestamp' => $log_entry['timestamp'],
+                     'level' => 'error',
+                     'message' => $log_entry['message'],
+                     'context' => json_encode($log_entry['context']),
+                     'error_type' => $log_entry['error_type'],
+                 ),
+                 array('%s', '%s', '%s', '%s', '%s')
+             );
+         } catch (Exception $e) {
+             // If database insert fails, fall back to WordPress error log
+             if (defined('WP_DEBUG') && WP_DEBUG) {
+                 error_log("Google Maps Reviews Widget [{$log_entry['error_type']}]: {$log_entry['message']}");
+             }
+         }
+     }
     
     /**
      * Handle parsing errors gracefully
