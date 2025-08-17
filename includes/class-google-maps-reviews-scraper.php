@@ -547,28 +547,25 @@ class Google_Maps_Reviews_Scraper {
             
             $xpath = new DOMXPath($dom);
             
-            // Try multiple selectors for review containers - updated for current Google Maps structure
-            $review_selectors = array(
-                // Current Google Maps review selectors (2024)
-                '//div[contains(@class, "jftiEf")]',
-                '//div[contains(@class, "g88MCb")]',
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "jftiEf")]',
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "g88MCb")]',
-                
-                // Alternative modern selectors
-                '//div[contains(@class, "review") and contains(@class, "jftiEf")]',
-                '//div[contains(@class, "review") and contains(@class, "g88MCb")]',
-                '//div[contains(@class, "review-item")]',
-                '//div[contains(@class, "review-container")]',
-                
-                // Generic review-like containers
-                '//div[contains(@class, "review")]',
-                '//div[contains(@class, "review-dialog")]//div[contains(@class, "review")]',
-                
-                // Fallback selectors for different Google Maps versions
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "review")]',
-                '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "review-item")]',
-            );
+                         // Try multiple selectors for review containers - updated for current Google Maps structure (2024)
+             $review_selectors = array(
+                 // Primary selector based on current Google Maps structure
+                 '//div[contains(@class, "jftiEf") and contains(@class, "fontBodyMedium")]',
+                 
+                 // Alternative selectors for the same structure
+                 '//div[contains(@class, "jftiEf")]',
+                 '//div[contains(@class, "jftiEf") and @data-review-id]',
+                 
+                 // Fallback selectors for different Google Maps versions
+                 '//div[contains(@class, "g88MCb")]',
+                 '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "jftiEf")]',
+                 '//div[contains(@class, "review-dialog-list")]//div[contains(@class, "g88MCb")]',
+                 
+                 // Generic review-like containers
+                 '//div[contains(@class, "review")]',
+                 '//div[contains(@class, "review-item")]',
+                 '//div[contains(@class, "review-container")]',
+             );
             
             $review_nodes = null;
             foreach ($review_selectors as $selector) {
@@ -741,23 +738,29 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return string Review ID
      */
-    private function extract_review_id($node, $xpath) {
-        // Try to find review ID in data attributes
-        $id_nodes = $xpath->query('.//@data-review-id', $node);
-        if ($id_nodes->length > 0) {
-            return $id_nodes->item(0)->value;
-        }
-        
-        // Try to extract from class names
-        $class_attr = $node->getAttribute('class');
-        if (preg_match('/review-(\d+)/', $class_attr, $matches)) {
-            return $matches[1];
-        }
-        
-        // Generate a unique ID based on content hash
-        $content = $node->textContent;
-        return 'review_' . md5($content);
-    }
+         private function extract_review_id($node, $xpath) {
+         // Try to find review ID in data attributes (current Google Maps structure)
+         $id_nodes = $xpath->query('.//@data-review-id', $node);
+         if ($id_nodes->length > 0) {
+             return $id_nodes->item(0)->value;
+         }
+         
+         // Try to get from the main node's data-review-id attribute
+         $review_id = $node->getAttribute('data-review-id');
+         if (!empty($review_id)) {
+             return $review_id;
+         }
+         
+         // Try to extract from class names
+         $class_attr = $node->getAttribute('class');
+         if (preg_match('/review-(\d+)/', $class_attr, $matches)) {
+             return $matches[1];
+         }
+         
+         // Generate a unique ID based on content hash
+         $content = $node->textContent;
+         return 'review_' . md5($content);
+     }
     
     /**
      * Extract author name from review node
@@ -766,17 +769,21 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return string|false Author name or false on failure
      */
-    private function extract_author_name($node, $xpath) {
-        $selectors = array(
-            './/div[contains(@class, "d4r55")]',
-            './/div[contains(@class, "TSUbDb")]',
-            './/div[contains(@class, "reviewer-name")]',
-            './/span[contains(@class, "reviewer-name")]',
-            './/div[contains(@class, "author-name")]',
-            './/span[contains(@class, "author-name")]',
-            './/div[contains(@class, "review-author")]',
-            './/span[contains(@class, "review-author")]',
-        );
+         private function extract_author_name($node, $xpath) {
+         $selectors = array(
+             // Current Google Maps structure (2024)
+             './/div[contains(@class, "d4r55") and contains(@class, "fontTitleMedium")]',
+             './/div[contains(@class, "d4r55")]',
+             
+             // Fallback selectors
+             './/div[contains(@class, "TSUbDb")]',
+             './/div[contains(@class, "reviewer-name")]',
+             './/span[contains(@class, "reviewer-name")]',
+             './/div[contains(@class, "author-name")]',
+             './/span[contains(@class, "author-name")]',
+             './/div[contains(@class, "review-author")]',
+             './/span[contains(@class, "review-author")]',
+         );
         
         foreach ($selectors as $selector) {
             $nodes = $xpath->query($selector, $node);
@@ -798,15 +805,19 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return string|false Author image URL or false on failure
      */
-    private function extract_author_image($node, $xpath) {
-        $selectors = array(
-            './/img[contains(@class, "lDY1rd")]',
-            './/img[contains(@class, "reviewer-avatar")]',
-            './/img[contains(@class, "author-avatar")]',
-            './/img[contains(@class, "profile-image")]',
-            './/img[contains(@class, "user-avatar")]',
-            './/img[contains(@alt, "profile")]',
-        );
+         private function extract_author_image($node, $xpath) {
+         $selectors = array(
+             // Current Google Maps structure (2024)
+             './/img[contains(@class, "NBa7we")]',
+             
+             // Fallback selectors
+             './/img[contains(@class, "lDY1rd")]',
+             './/img[contains(@class, "reviewer-avatar")]',
+             './/img[contains(@class, "author-avatar")]',
+             './/img[contains(@class, "profile-image")]',
+             './/img[contains(@class, "user-avatar")]',
+             './/img[contains(@alt, "profile")]',
+         );
         
         foreach ($selectors as $selector) {
             $nodes = $xpath->query($selector, $node);
@@ -828,16 +839,20 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return int Rating (1-5) or 0 on failure
      */
-    private function extract_rating($node, $xpath) {
-        $selectors = array(
-            './/span[contains(@class, "kvMYJc")]',
-            './/span[contains(@class, "review-rating")]',
-            './/span[contains(@class, "rating")]',
-            './/div[contains(@class, "review-rating")]',
-            './/div[contains(@class, "rating")]',
-            './/span[contains(@aria-label, "stars")]',
-            './/span[contains(@aria-label, "rating")]',
-        );
+         private function extract_rating($node, $xpath) {
+         $selectors = array(
+             // Current Google Maps structure (2024)
+             './/span[contains(@class, "kvMYJc") and @role="img"]',
+             './/span[contains(@class, "kvMYJc")]',
+             
+             // Fallback selectors
+             './/span[contains(@class, "review-rating")]',
+             './/span[contains(@class, "rating")]',
+             './/div[contains(@class, "review-rating")]',
+             './/div[contains(@class, "rating")]',
+             './/span[contains(@aria-label, "stars")]',
+             './/span[contains(@aria-label, "rating")]',
+         );
         
         foreach ($selectors as $selector) {
             $nodes = $xpath->query($selector, $node);
@@ -874,18 +889,22 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return string|false Review content or false on failure
      */
-    private function extract_review_content($node, $xpath) {
-        $selectors = array(
-            './/span[contains(@class, "wiI7pd")]',
-            './/div[contains(@class, "review-content")]',
-            './/span[contains(@class, "review-content")]',
-            './/div[contains(@class, "review-text")]',
-            './/span[contains(@class, "review-text")]',
-            './/div[contains(@class, "review-body")]',
-            './/span[contains(@class, "review-body")]',
-            './/div[contains(@class, "review-comment")]',
-            './/span[contains(@class, "review-comment")]',
-        );
+         private function extract_review_content($node, $xpath) {
+         $selectors = array(
+             // Current Google Maps structure (2024)
+             './/span[contains(@class, "wiI7pd")]',
+             './/div[contains(@class, "MyEned")]//span[contains(@class, "wiI7pd")]',
+             
+             // Fallback selectors
+             './/div[contains(@class, "review-content")]',
+             './/span[contains(@class, "review-content")]',
+             './/div[contains(@class, "review-text")]',
+             './/span[contains(@class, "review-text")]',
+             './/div[contains(@class, "review-body")]',
+             './/span[contains(@class, "review-body")]',
+             './/div[contains(@class, "review-comment")]',
+             './/span[contains(@class, "review-comment")]',
+         );
         
         foreach ($selectors as $selector) {
             $nodes = $xpath->query($selector, $node);
@@ -907,17 +926,21 @@ class Google_Maps_Reviews_Scraper {
      * @param DOMXPath $xpath XPath object
      * @return string|false Review date or false on failure
      */
-    private function extract_review_date($node, $xpath) {
-        $selectors = array(
-            './/span[contains(@class, "rsqaWe")]',
-            './/span[contains(@class, "review-date")]',
-            './/div[contains(@class, "review-date")]',
-            './/span[contains(@class, "date")]',
-            './/div[contains(@class, "date")]',
-            './/span[contains(@class, "timestamp")]',
-            './/div[contains(@class, "timestamp")]',
-            './/time',
-        );
+         private function extract_review_date($node, $xpath) {
+         $selectors = array(
+             // Current Google Maps structure (2024)
+             './/span[contains(@class, "rsqaWe")]',
+             './/div[contains(@class, "DU9Pgb")]//span[contains(@class, "rsqaWe")]',
+             
+             // Fallback selectors
+             './/span[contains(@class, "review-date")]',
+             './/div[contains(@class, "review-date")]',
+             './/span[contains(@class, "date")]',
+             './/div[contains(@class, "date")]',
+             './/span[contains(@class, "timestamp")]',
+             './/div[contains(@class, "timestamp")]',
+             './/time',
+         );
         
         foreach ($selectors as $selector) {
             $nodes = $xpath->query($selector, $node);
@@ -1001,27 +1024,34 @@ class Google_Maps_Reviews_Scraper {
      * @param string $text Rating text
      * @return int Rating (1-5)
      */
-    private function extract_rating_from_text($text) {
-        if (preg_match('/(\d+)/', $text, $matches)) {
-            $rating = intval($matches[1]);
-            return max(1, min(5, $rating));
-        }
-        
-        // Try to extract from star emoji or text
-        if (strpos($text, '5') !== false || strpos($text, '★★★★★') !== false) {
-            return 5;
-        } elseif (strpos($text, '4') !== false || strpos($text, '★★★★☆') !== false) {
-            return 4;
-        } elseif (strpos($text, '3') !== false || strpos($text, '★★★☆☆') !== false) {
-            return 3;
-        } elseif (strpos($text, '2') !== false || strpos($text, '★★☆☆☆') !== false) {
-            return 2;
-        } elseif (strpos($text, '1') !== false || strpos($text, '★☆☆☆☆') !== false) {
-            return 1;
-        }
-        
-        return 0;
-    }
+         private function extract_rating_from_text($text) {
+         // First try to extract from aria-label (most reliable)
+         if (preg_match('/(\d+)\s*stars?/i', $text, $matches)) {
+             $rating = intval($matches[1]);
+             return max(1, min(5, $rating));
+         }
+         
+         // Try to extract from numeric patterns
+         if (preg_match('/(\d+)/', $text, $matches)) {
+             $rating = intval($matches[1]);
+             return max(1, min(5, $rating));
+         }
+         
+         // Try to extract from star emoji or text
+         if (strpos($text, '5') !== false || strpos($text, '★★★★★') !== false) {
+             return 5;
+         } elseif (strpos($text, '4') !== false || strpos($text, '★★★★☆') !== false) {
+             return 4;
+         } elseif (strpos($text, '3') !== false || strpos($text, '★★★☆☆') !== false) {
+             return 3;
+         } elseif (strpos($text, '2') !== false || strpos($text, '★★☆☆☆') !== false) {
+             return 2;
+         } elseif (strpos($text, '1') !== false || strpos($text, '★☆☆☆☆') !== false) {
+             return 1;
+         }
+         
+         return 0;
+     }
     
     /**
      * Extract number from text
